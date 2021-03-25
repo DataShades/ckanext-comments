@@ -4,7 +4,7 @@ import ckan.model as model
 
 from ckanext.comments.model import Thread, Comment
 
-CONFIG_REQUIRE_APPROVAL = 'ckanext.comments.require_approval'
+CONFIG_REQUIRE_APPROVAL = "ckanext.comments.require_approval"
 
 _actions = {}
 
@@ -58,7 +58,7 @@ def thread_show(context, data_dict):
     thread = model.Session.query(Thread).filter(Thread.id == id).one_or_none()
     if thread is None:
         raise tk.ObjectNotFound("Thread not found")
-    context['include_comments'] = data_dict.get("include_comments", False)
+    context["include_comments"] = data_dict.get("include_comments", False)
     thread_dict = thread.dictize(context)
     return thread_dict
 
@@ -80,9 +80,15 @@ def thread_delete(context, data_dict):
 def comment_create(context, data_dict):
     thread_id, content = tk.get_or_bust(data_dict, ["thread_id", "content"])
     tk.check_access("comments_comment_create", context, data_dict)
-    thread_dict = tk.get_action("comments_thread_show")(
-        context.copy(), {"id": thread_id}
-    )
+    try:
+        thread_dict = tk.get_action("comments_thread_show")(
+            context.copy(), {"id": thread_id}
+        )
+    except tk.ObjectNotFound:
+        if data_dict.get('init_thread'):
+            thread_dict = tk.get_action("comments_thread_create")(
+                context.copy(), {"id": thread_id}
+            )
 
     if not content:
         raise tk.ValidationError({"content": ["Cannot be empty"]})

@@ -1,0 +1,44 @@
+.comments-thread {
+
+}
+.comments-comment {
+
+}
+.comment {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: flex-start;
+    padding: 0.5rem;
+}
+.comment.comment-state-draft {
+    background: #f4f4f4;
+}
+.comment-body {
+    width: 100%;
+}
+.comment-author {
+    font-weight: 500;
+    font-size: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+.comment-author:after {
+    content: ':';
+}
+.comment-content {
+    font-size: 0.8rem;
+    padding: 0 15px;
+}
+.comment-date {
+    padding: 10px 15px;
+    opacity: 0.6;
+}
+.comment-actions {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+}
+
+.comment-actions .label {
+    margin-bottom: 5px;
+    border: none;
+}

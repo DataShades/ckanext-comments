@@ -16,8 +16,8 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
-    version='0.0.1',
-
+    version='0.0.2',
+    python_requires=">=3.7",
     description='''''',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -70,6 +70,7 @@ setup(
     # have to be included in MANIFEST.in as well.
     include_package_data=True,
     package_data={
+        'ckanext.comments': ['assets/**/*']
     },
 
     # Although 'package_data' is the preferred approach, in some case you may

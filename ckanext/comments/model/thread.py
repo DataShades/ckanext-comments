@@ -46,7 +46,7 @@ class Thread(Base):
         from .comment import Comment
 
         comments_dictized = None
-        if context.get('include_comments'):
+        if context.get("include_comments"):
             comments = self.comments()
 
             approved_filter = Comment.state == Comment.State.approved

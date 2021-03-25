@@ -1,0 +1,14 @@
+comments-thread:
+  filter: rjsmin
+  output: ckanext-comments/%(version)s-comments-thread.js
+  contents:
+    - js/comments-thread.js
+  extra:
+    preload:
+      - base/main
+
+comments-thread-styles:
+  filter: cssrewrite
+  output: ckanext-comments/%(version)s-comments-thread-styles.css
+  contents:
+    - css/comments-thread.css

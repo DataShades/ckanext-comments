@@ -1,17 +1,35 @@
 {#
 comment - dict
 #}
-{#% set data = h.comments_prepare_comment(comment) %#}
-{% set data = comment %}
+{% set data = h.comments_prepare_comment(comment) %}
+
 
 <div class="comment comment-state-{{ data.state }}">
-    <div class="comment-author">
-        {{ data.user.fullname or data.user.name }}
+    <div class="comment-body">
+
+        <div class="comment-author">
+            {{ data.user.fullname or data.user.name }}
+        </div>
+        <div class="comment-content">
+            {{ data.content }}
+        </div>
+        <div class="comment-date">
+            {{ h.time_ago_from_timestamp(data.modified_at or data.created_at) }}
+        </div>
     </div>
-    <div class="comment-content">
-        {{ data.content }}
-    </div>
-    <div class="comment-date">
-        {{ h.render_datetime(data.modified_at or data.created_at) }}
+
+    <div class="comment-actions">
+        {% if not comment.approved and h.check_access('comments_comment_approve', {id: data.id}) %}
+            <button class="label label-success approve-comment" data-id="{{ data.id }}">
+                <i class="fa fa-check"></i>
+                <span class="text">{{ _('Approve') }}</span>
+            </button>
+        {% endif %}
+        {% if h.check_access('comments_comment_delete', {id: data.id}) %}
+            <button class="label label-danger remove-comment" data-id="{{ data.id }}">
+                <i class="fa fa-remove"></i>
+                <span class="text">{{ _('Remove') }}</span>
+            </button>
+        {% endif %}
     </div>
 </div>

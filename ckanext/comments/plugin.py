@@ -5,6 +5,7 @@ import ckanext.comments.logic.action as action
 import ckanext.comments.logic.auth as auth
 import ckanext.comments.helpers as helpers
 
+
 class CommentsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IAuthFunctions)

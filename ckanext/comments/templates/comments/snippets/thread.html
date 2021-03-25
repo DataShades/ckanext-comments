@@ -1,14 +1,29 @@
 {#
 comments - optional list of comment dicts
 thread_id - optional subject for thread
+
+{% snippet 'comments/snippets/thread.html', comments=comments %}
+{% snippet 'comments/snippets/thread.html', thread_id=pkg.id %}
 #}
 
 {% set items = comments or h.comments_thread_for(thread_id).comments or [] %}
 
-<ul class="list-unstyles comments-thread">
-    {% for comment in items %}
-        <li class="comments-comment">
-            {% snippet 'comments/snippets/comment.html', comment=comment %}
-        </li>
-    {% endfor %}
-</ul>
+{% asset 'comments/comments-thread' %}
+{% asset 'comments/comments-thread-styles' %}
+
+<div data-module="comments-thread">
+    {% if items %}
+        <h3>{{ _('Comments') }}</h3>
+        <ul class="list-unstyled comments-thread">
+            {% for comment in items %}
+                <li class="comments-comment">
+                    {% snippet 'comments/snippets/comment.html', comment=comment %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if h.check_access('comments_comment_create', {thread_id: thread_id}) %}
+        {% snippet 'comments/snippets/comment_form.html', thread_id=thread_id %}
+    {% endif %}
+</div>

@@ -1,0 +1,20 @@
+{#
+thread_id
+#}
+
+<form class="form comment-form">
+    <fieldset>
+        <legend>{{ _('Leave a comment') }}</legend>
+        <input name="thread_id" type="hidden" value="{{ thread_id }}"/>
+        <div class="form-group control-full">
+            <label for="comment-content" class="control-label">{{ _('Content') }}</label>
+            <textarea required id="comment-content" name="content" class="form-control"></textarea>
+        </div>
+    </fieldset>
+
+    <div class="form-group control-full">
+        <button type="submit" class="btn btn-primary">
+            {{ _('Save') }}
+        </button>
+    </div>
+</form>
