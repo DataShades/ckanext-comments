@@ -1,0 +1,17 @@
+{#
+comment - dict
+#}
+{#% set data = h.comments_prepare_comment(comment) %#}
+{% set data = comment %}
+
+<div class="comment comment-state-{{ data.state }}">
+    <div class="comment-author">
+        {{ data.user.fullname or data.user.name }}
+    </div>
+    <div class="comment-content">
+        {{ data.content }}
+    </div>
+    <div class="comment-date">
+        {{ h.render_datetime(data.modified_at or data.created_at) }}
+    </div>
+</div>

@@ -1,0 +1,14 @@
+{#
+comments - optional list of comment dicts
+thread_id - optional subject for thread
+#}
+
+{% set items = comments or h.comments_thread_for(thread_id).comments or [] %}
+
+<ul class="list-unstyles comments-thread">
+    {% for comment in items %}
+        <li class="comments-comment">
+            {% snippet 'comments/snippets/comment.html', comment=comment %}
+        </li>
+    {% endfor %}
+</ul>
