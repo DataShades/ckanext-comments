@@ -30,9 +30,16 @@ class TestThread:
         comment = Comment(thread=t)
         call_action("comments_comment_approve", id=comment["id"])
         with pytest.raises(tk.ObjectNotFound):
-            call_action("comments_thread_show", subject_id="123-random", subject_type='package')
+            call_action(
+                "comments_thread_show",
+                subject_id="123-random",
+                subject_type="package",
+            )
         thread = call_action(
-            "comments_thread_show", subject_id=t["subject_id"], subject_type=t["subject_type"], include_comments=True
+            "comments_thread_show",
+            subject_id=t["subject_id"],
+            subject_type=t["subject_type"],
+            include_comments=True,
         )
         assert thread["id"] == t["id"]
         assert len(thread["comments"]) == 2
@@ -40,7 +47,8 @@ class TestThread:
         thread = call_action(
             "comments_thread_show",
             {"ignore_auth": False, "user": user["name"]},
-            subject_id=t["subject_id"], subject_type=t["subject_type"],
+            subject_id=t["subject_id"],
+            subject_type=t["subject_type"],
             include_comments=True,
         )
         assert len(thread["comments"]) == 1
@@ -53,7 +61,11 @@ class TestThread:
             call_action("comments_thread_delete", id="123-random")
         call_action("comments_thread_delete", id=thread["id"])
         with pytest.raises(tk.ObjectNotFound):
-            call_action("comments_thread_show", subject_id=thread["subject_id"], subject_type=thread["subject_type"],)
+            call_action(
+                "comments_thread_show",
+                subject_id=thread["subject_id"],
+                subject_type=thread["subject_type"],
+            )
 
 
 @pytest.mark.usefixtures("clean_db")

@@ -3,7 +3,10 @@ import ckan.plugins.toolkit as tk
 import ckan.model as model
 
 from ckanext.comments.model import Thread, Comment
-from ckanext.comments.exceptions import UnsupportedSubjectType, UnsupportedAuthorType
+from ckanext.comments.exceptions import (
+    UnsupportedSubjectType,
+    UnsupportedAuthorType,
+)
 
 CONFIG_REQUIRE_APPROVAL = "ckanext.comments.require_approval"
 
@@ -22,7 +25,7 @@ def get_actions():
 
 @action
 def thread_create(context, data_dict):
-    id_, type_ = tk.get_or_bust(data_dict, ['subject_id', 'subject_type'])
+    id_, type_ = tk.get_or_bust(data_dict, ["subject_id", "subject_type"])
     tk.check_access("comments_thread_create", context, data_dict)
     thread = Thread.for_subject(type_, id_, init_missing=True)
     try:
@@ -32,7 +35,13 @@ def thread_create(context, data_dict):
             {"subject_type": [f"Unsupported subject_type: {e}"]}
         )
     if thread.id:
-        raise tk.ValidationError({"id": ["Thread for the given subject_id and subject_type already exists"]})
+        raise tk.ValidationError(
+            {
+                "id": [
+                    "Thread for the given subject_id and subject_type already exists"
+                ]
+            }
+        )
     if subject is None:
         raise tk.ObjectNotFound("Cannot find subject for thread")
     # make sure we are not messing up with name_or_id
@@ -46,12 +55,15 @@ def thread_create(context, data_dict):
 
 @action
 def thread_show(context, data_dict):
-    id_, type_ = tk.get_or_bust(data_dict, ['subject_id', 'subject_type'])
+    id_, type_ = tk.get_or_bust(data_dict, ["subject_id", "subject_type"])
     tk.check_access("comments_thread_show", context, data_dict)
-    thread = Thread.for_subject(type_, id_, init_missing=data_dict.get('init_missing', False))
+    thread = Thread.for_subject(
+        type_, id_, init_missing=data_dict.get("init_missing", False)
+    )
     if thread is None:
         raise tk.ObjectNotFound("Thread not found")
     context["include_comments"] = data_dict.get("include_comments", False)
+    context["include_author"] = data_dict.get("include_author", False)
     thread_dict = thread.dictize(context)
     return thread_dict
 
@@ -71,7 +83,9 @@ def thread_delete(context, data_dict):
 
 @action
 def comment_create(context, data_dict):
-    id_, type_, content = tk.get_or_bust(data_dict, ["subject_id", "subject_type", "content"])
+    id_, type_, content = tk.get_or_bust(
+        data_dict, ["subject_id", "subject_type", "content"]
+    )
     tk.check_access("comments_comment_create", context, data_dict)
 
     if not content:
@@ -82,7 +96,7 @@ def comment_create(context, data_dict):
             context.copy(), {"subject_id": id_, "subject_type": type_}
         )
     except tk.ObjectNotFound:
-        if data_dict.get('create_thread'):
+        if data_dict.get("create_thread"):
             thread_dict = tk.get_action("comments_thread_create")(
                 context.copy(), {"subject_id": id_, "subject_type": type_}
             )

@@ -28,7 +28,7 @@ def upgrade():
             nullable=False,
             server_default=sa.func.current_timestamp(),
         ),
-        sa.Index('subject_idx', 'subject_id', 'subject_type', unique=True),
+        sa.Index("subject_idx", "subject_id", "subject_type", unique=True),
     )
     op.create_table(
         "comments_comments",

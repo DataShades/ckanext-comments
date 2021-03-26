@@ -3,15 +3,16 @@ from __future__ import annotations
 import logging
 
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING, Union, cast
 
 from sqlalchemy import Column, DateTime, Text
+from sqlalchemy.orm import Query
 
 import ckan.model as model
-import ckan.lib.dictization as d
+
 from ckan.model.types import make_uuid
 
-
+from .dictize import get_dictizer
 from .base import Base
 from ckanext.comments.exceptions import UnsupportedSubjectType
 
@@ -20,13 +21,17 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
+Subject = Union[model.Package, model.Resource, model.User, model.Group]
+SubjectGetter = Callable[[str], Optional[Subject]]
+
+
 class Thread(Base):
     __tablename__ = "comments_threads"
-    _subject_getters = {
-        'package': model.Package.get,
-        'resource': model.Resource.get,
-        'user': model.User.get,
-        'group': model.Group.get,
+    _subject_getters: dict[str, SubjectGetter] = {
+        "package": model.Package.get,
+        "resource": model.Resource.get,
+        "user": model.User.get,
+        "group": model.Group.get,
     }
 
     id: str = Column(Text, primary_key=True, default=make_uuid)
@@ -45,55 +50,40 @@ class Thread(Base):
             ")"
         )
 
-    def comments(self):
+    def comments(self) -> Query:
         from .comment import Comment
 
-        return model.Session.query(Comment).filter(
-            Comment.thread_id == self.id
-        )
+        return Comment.by_thread(self.id)
 
-    def get_subject(self):
+    def get_subject(self) -> Optional[Subject]:
         try:
             getter = self._subject_getters[self.subject_type]
         except KeyError:
-            log.error('Unknown subject type: %s', self.subject_type)
+            log.error("Unknown subject type: %s", self.subject_type)
             raise UnsupportedSubjectType(self.subject_type)
         return getter(self.subject_id)
 
     @classmethod
-    def for_subject(cls, type_, id_, init_missing=False) -> Optional[Thread]:
-        thread = model.Session.query(cls).filter(
-            cls.subject_type==type_,
-            cls.subject_id==id_
-        ).one_or_none()
+    def for_subject(
+        cls, type_: str, id_: str, init_missing: bool = False
+    ) -> Optional[Thread]:
+        thread = cast(
+            Optional[Thread],
+            model.Session.query(cls)
+            .filter(cls.subject_type == type_, cls.subject_id == id_)
+            .one_or_none(),
+        )
         if thread is None and init_missing:
             thread = cls(subject_type=type_, subject_id=id_)
         return thread
 
-    def dictize(self, context:dict)->dict:
+    def dictize(self, context: dict) -> dict:
         from .comment import Comment
 
         comments_dictized = None
         if context.get("include_comments"):
-            comments = self.comments()
+            comments_dictized = Comment.dictize_thread(self.id, context)
 
-            approved_filter = Comment.state == Comment.State.approved
-            if not context["user"]:
-                comments = comments.filter(approved_filter)
-            elif (
-                not context.get("ignore_auth")
-                and not context["auth_user_obj"].sysadmin
-            ):
-                comments = comments.filter(
-                    approved_filter
-                    | (
-                        (Comment.author_type == "user")
-                        & (Comment.author_id == context["auth_user_obj"].id)
-                    )
-                )
-            dictize_context = dict(**context, active=False)
-            comments_dictized = d.obj_list_dictize(
-                comments, dictize_context, sort_key=lambda c: c["created_at"]
-            )
-
-        return d.table_dictize(self, context, comments=comments_dictized)
+        return get_dictizer(type(self))(
+            self, context, comments=comments_dictized
+        )

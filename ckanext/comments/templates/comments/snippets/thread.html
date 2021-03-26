@@ -12,10 +12,9 @@ subject_type - optional type of the subject for thread
 
 <div data-module="comments-thread">
     {% if comments %}
-        <h3>{{ _('Comments') }}</h3>
+        <h3 class="heading">{{ _('Comments') }}</h3>
         {% snippet 'comments/snippets/comments_list.html', comments=comments %}
     {% endif %}
-
 
     {% if h.check_access('comments_comment_create', {subject_id: subject_id, subject_type: subject_type}) %}
         {% snippet 'comments/snippets/comment_form.html', subject_id=subject_id, subject_type=subject_type %}

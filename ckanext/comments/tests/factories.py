@@ -14,7 +14,7 @@ class Thread(factory.Factory):
         model = model.Thread
 
     subject_id = factory.LazyAttribute(lambda _: factories.Dataset()["id"])
-    subject_type = 'package'
+    subject_type = "package"
 
     @classmethod
     def _create(cls, target_class, *args, **kwargs):
@@ -38,9 +38,9 @@ class Comment(factory.Factory):
     def _create(cls, target_class, *args, **kwargs):
         context = {"user": factories._get_action_user_name(kwargs)}
 
-        thread = kwargs.pop('thread')
-        kwargs['subject_id'] = thread['subject_id']
-        kwargs['subject_type'] = thread['subject_type']
+        thread = kwargs.pop("thread")
+        kwargs["subject_id"] = thread["subject_id"]
+        kwargs["subject_type"] = thread["subject_type"]
 
         comment_dict = helpers.call_action(
             "comments_comment_create", context=context, **kwargs
