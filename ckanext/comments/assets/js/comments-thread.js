@@ -57,15 +57,15 @@ ckan.module("comments-thread", function ($, _) {
     _onSubmit: function (e) {
       e.preventDefault();
       var data = new FormData(e.target);
-      var content = data.get("content");
-      var thread_id = data.get("thread_id");
+
       this.sandbox.client.call(
         "POST",
         "comments_comment_create",
         {
-          content: content,
-          thread_id: thread_id,
-          init_thread: true,
+          content: data.get("content"),
+          subject_id: data.get("subject_id"),
+          subject_type: data.get("subject_type"),
+          create_thread: true,
         },
         function () {
           window.location.reload();

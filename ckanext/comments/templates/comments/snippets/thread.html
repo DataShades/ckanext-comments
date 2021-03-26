@@ -1,29 +1,23 @@
 {#
-comments - optional list of comment dicts
-thread_id - optional subject for thread
+subject_id - optional subject for thread
+subject_type - optional type of the subject for thread
 
-{% snippet 'comments/snippets/thread.html', comments=comments %}
-{% snippet 'comments/snippets/thread.html', thread_id=pkg.id %}
+{% snippet 'comments/snippets/thread.html', subject_id=pkg.id, subject_type='package' %}
 #}
 
-{% set items = comments or h.comments_thread_for(thread_id).comments or [] %}
+{% set comments = h.comments_thread_for(subject_id, subject_type).comments or [] %}
 
 {% asset 'comments/comments-thread' %}
 {% asset 'comments/comments-thread-styles' %}
 
 <div data-module="comments-thread">
-    {% if items %}
+    {% if comments %}
         <h3>{{ _('Comments') }}</h3>
-        <ul class="list-unstyled comments-thread">
-            {% for comment in items %}
-                <li class="comments-comment">
-                    {% snippet 'comments/snippets/comment.html', comment=comment %}
-                </li>
-            {% endfor %}
-        </ul>
+        {% snippet 'comments/snippets/comments_list.html', comments=comments %}
     {% endif %}
 
-    {% if h.check_access('comments_comment_create', {thread_id: thread_id}) %}
-        {% snippet 'comments/snippets/comment_form.html', thread_id=thread_id %}
+
+    {% if h.check_access('comments_comment_create', {subject_id: subject_id, subject_type: subject_type}) %}
+        {% snippet 'comments/snippets/comment_form.html', subject_id=subject_id, subject_type=subject_type %}
     {% endif %}
 </div>

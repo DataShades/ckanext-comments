@@ -14,25 +14,25 @@ class TestThread:
             call_action(
                 "comments_thread_create",
                 subject_type="package",
-                id="123-random",
+                subject_id="123-random",
             )
 
         thread = call_action(
             "comments_thread_create",
             subject_type="package",
-            id=dataset["id"],
+            subject_id=dataset["id"],
         )
 
     def test_thread_show(self, Thread, Comment):
         user = factories.User()
         t = Thread()
-        Comment(thread_id=t["id"])
-        comment = Comment(thread_id=t["id"])
+        Comment(thread=t)
+        comment = Comment(thread=t)
         call_action("comments_comment_approve", id=comment["id"])
         with pytest.raises(tk.ObjectNotFound):
-            call_action("comments_thread_show", id="123-random")
+            call_action("comments_thread_show", subject_id="123-random", subject_type='package')
         thread = call_action(
-            "comments_thread_show", id=t["id"], include_comments=True
+            "comments_thread_show", subject_id=t["subject_id"], subject_type=t["subject_type"], include_comments=True
         )
         assert thread["id"] == t["id"]
         assert len(thread["comments"]) == 2
@@ -40,7 +40,7 @@ class TestThread:
         thread = call_action(
             "comments_thread_show",
             {"ignore_auth": False, "user": user["name"]},
-            id=t["id"],
+            subject_id=t["subject_id"], subject_type=t["subject_type"],
             include_comments=True,
         )
         assert len(thread["comments"]) == 1
@@ -53,7 +53,7 @@ class TestThread:
             call_action("comments_thread_delete", id="123-random")
         call_action("comments_thread_delete", id=thread["id"])
         with pytest.raises(tk.ObjectNotFound):
-            call_action("comments_thread_show", id=thread["id"])
+            call_action("comments_thread_show", subject_id=thread["subject_id"], subject_type=thread["subject_type"],)
 
 
 @pytest.mark.usefixtures("clean_db")
@@ -67,7 +67,8 @@ class TestComment:
             # real thread required
             call_action(
                 "comments_comment_create",
-                thread_id="not-exists",
+                subject_id="not-exists",
+                subject_type="not-exists",
                 content=content,
             )
 
@@ -75,14 +76,16 @@ class TestComment:
             # author is required
             call_action(
                 "comments_comment_create",
-                thread_id=thread["id"],
+                subject_id=thread["subject_id"],
+                subject_type=thread["subject_type"],
                 content=content,
             )
 
         comment = call_action(
             "comments_comment_create",
             {"user": user["name"]},
-            thread_id=thread["id"],
+            subject_id=thread["subject_id"],
+            subject_type=thread["subject_type"],
             content=content,
         )
 

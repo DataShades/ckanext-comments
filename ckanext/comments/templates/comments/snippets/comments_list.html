@@ -1,0 +1,11 @@
+{#
+comments - list of the comments to display
+#}
+
+<ul class="list-unstyled comments-thread">
+    {% for comment in comments %}
+        <li class="comments-comment">
+            {% snippet 'comments/snippets/comment.html', comment=comment %}
+        </li>
+    {% endfor %}
+</ul>

@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-import ckan.model as model
 import ckan.plugins.toolkit as tk
 
-from ckanext.comments.model import Thread, Comment
+from ckanext.comments.model import Comment
 
 _helpers = {}
 
@@ -21,13 +20,10 @@ def helper(func):
 
 
 @helper
-def thread_for(id: Optional[str]) -> dict[str, Any]:
-    try:
-        thread = tk.get_action("comments_thread_show")(
-            None, {"id": id, "include_comments": True}
+def thread_for(id_: Optional[str], type_: str) -> dict[str, Any]:
+    thread = tk.get_action("comments_thread_show")(
+            None, {"subject_id": id_, 'subject_type': type_, "include_comments": True, 'init_missing': True}
         )
-    except tk.ObjectNotFound:
-        thread = Thread(id=id).dictize({'model': model})
     return thread
 
 @helper

@@ -1,9 +1,12 @@
 from __future__ import annotations
+
+import logging
+
 from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import Column, DateTime, Text, ForeignKey
-from sqlalchemy.orm import relationship, remote, foreign
+from sqlalchemy.orm import relationship, foreign
 
 import ckan.model as model
 import ckan.lib.dictization as d
@@ -11,10 +14,17 @@ from ckan.model.types import make_uuid
 
 from .base import Base
 from . import Thread
+from ckanext.comments.exceptions import UnsupportedAuthorType
+
+
+log = logging.getLogger(__name__)
 
 
 class Comment(Base):
     __tablename__ = "comments_comments"
+    _author_getters = {
+        "user": model.User.get
+    }
 
     class State:
         draft = "draft"
@@ -77,3 +87,11 @@ class Comment(Base):
 
     def dictize(self, context):
         return d.table_dictize(self, context.copy())
+
+    def get_author(self):
+        try:
+            getter = self._author_getters[self.author_type]
+        except KeyError:
+            log.error('Unknown subject type: %s', self.author_type)
+            raise UnsupportedAuthorType(self.author_type)
+        return getter(self.author_id)

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import logging
+
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from sqlalchemy import Column, DateTime, Text
 
@@ -11,16 +13,24 @@ from ckan.model.types import make_uuid
 
 
 from .base import Base
-
+from ckanext.comments.exceptions import UnsupportedSubjectType
 
 if TYPE_CHECKING:
     from .comment import Comment
 
+log = logging.getLogger(__name__)
 
 class Thread(Base):
     __tablename__ = "comments_threads"
+    _subject_getters = {
+        'package': model.Package.get,
+        'resource': model.Resource.get,
+        'user': model.User.get,
+        'group': model.Group.get,
+    }
 
     id: str = Column(Text, primary_key=True, default=make_uuid)
+    subject_id: str = Column(Text, nullable=False)
     subject_type: str = Column(Text, nullable=False)
 
     created_at: datetime = Column(
@@ -42,7 +52,25 @@ class Thread(Base):
             Comment.thread_id == self.id
         )
 
-    def dictize(self, context):
+    def get_subject(self):
+        try:
+            getter = self._subject_getters[self.subject_type]
+        except KeyError:
+            log.error('Unknown subject type: %s', self.subject_type)
+            raise UnsupportedSubjectType(self.subject_type)
+        return getter(self.subject_id)
+
+    @classmethod
+    def for_subject(cls, type_, id_, init_missing=False) -> Optional[Thread]:
+        thread = model.Session.query(cls).filter(
+            cls.subject_type==type_,
+            cls.subject_id==id_
+        ).one_or_none()
+        if thread is None and init_missing:
+            thread = cls(subject_type=type_, subject_id=id_)
+        return thread
+
+    def dictize(self, context:dict)->dict:
         from .comment import Comment
 
         comments_dictized = None

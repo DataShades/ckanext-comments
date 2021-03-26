@@ -1,11 +1,13 @@
 {#
-thread_id
+subject_id
+subject_type
 #}
 
 <form class="form comment-form">
     <fieldset>
         <legend>{{ _('Leave a comment') }}</legend>
-        <input name="thread_id" type="hidden" value="{{ thread_id }}"/>
+        <input name="subject_id" type="hidden" value="{{ subject_id }}"/>
+        <input name="subject_type" type="hidden" value="{{ subject_type }}"/>
         <div class="form-group control-full">
             <label for="comment-content" class="control-label">{{ _('Content') }}</label>
             <textarea required id="comment-content" name="content" class="form-control"></textarea>
