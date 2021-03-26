@@ -1,22 +1,22 @@
 {#
-subject_id - optional subject for thread
-subject_type - optional type of the subject for thread
+subject_id - subject for thread
+subject_type - type of the subject for thread
 
 {% snippet 'comments/snippets/thread.html', subject_id=pkg.id, subject_type='package' %}
 #}
 
-{% set comments = h.comments_thread_for(subject_id, subject_type).comments or [] %}
+{% set thread = h.comments_thread_for(subject_id, subject_type) %}
 
 {% asset 'comments/comments-thread' %}
 {% asset 'comments/comments-thread-styles' %}
 
 <div data-module="comments-thread">
-    {% if comments %}
+    {% if thread.comments %}
         <h3 class="heading">{{ _('Comments') }}</h3>
-        {% snippet 'comments/snippets/comments_list.html', comments=comments %}
+        {% snippet 'comments/snippets/comments_list.html', comments=thread.comments %}
     {% endif %}
 
-    {% if h.check_access('comments_comment_create', {subject_id: subject_id, subject_type: subject_type}) %}
-        {% snippet 'comments/snippets/comment_form.html', subject_id=subject_id, subject_type=subject_type %}
+    {% if h.check_access('comments_comment_create', thread) %}
+        {% snippet 'comments/snippets/comment_form.html', subject_id=thread.subject_id, subject_type=thread.subject_type %}
     {% endif %}
 </div>

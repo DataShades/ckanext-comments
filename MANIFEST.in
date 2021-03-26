@@ -2,4 +2,4 @@ include README.rst
 include LICENSE
 include requirements.txt
 recursive-include ckanext/comments *.html *.json *.js *.less *.css *.mo *.yml
-recursive-include ckanext/comments/migration *.ini *.py
+recursive-include ckanext/comments/migration *.ini *.py *.mako
