@@ -76,15 +76,6 @@ class TestComment:
         content = "random content"
 
         with pytest.raises(tk.ObjectNotFound):
-            # real thread required
-            call_action(
-                "comments_comment_create",
-                subject_id="not-exists",
-                subject_type="not-exists",
-                content=content,
-            )
-
-        with pytest.raises(tk.ObjectNotFound):
             # author is required
             call_action(
                 "comments_comment_create",

@@ -7,6 +7,7 @@ import ckan.tests.factories as factories
 import ckanext.comments.model as c_model
 from ckanext.comments.exceptions import UnsupportedAuthorType
 
+
 def test_approval():
     c = c_model.Comment(state=c_model.Comment.State.draft)
     assert not c.is_approved()
@@ -63,8 +64,8 @@ class TestComment:
         )
 
         assert g1 == g2
-        assert g1 == [c1['id'], c2['id']]
-        assert g3 == [c3['id']]
+        assert g1 == [c1["id"], c2["id"]]
+        assert g3 == [c3["id"]]
 
     def test_dictize_thread(self, Comment, Thread):
         sysadmin = factories.Sysadmin()
@@ -73,38 +74,48 @@ class TestComment:
         c1 = Comment(thread=th)
         c2 = Comment(thread=th, user=user)
         c3 = Comment(thread=th)
-        call_action('comments_comment_approve', id=c1['id'])
+        call_action("comments_comment_approve", id=c1["id"])
 
-        comments = c_model.Comment.dictize_thread(th['id'], {'model': model, 'user': ''})
+        comments = c_model.Comment.dictize_thread(
+            th["id"], {"model": model, "user": ""}
+        )
         assert len(comments) == 1
-        assert 'author' not in comments[0]
-        assert comments[0]['approved']
+        assert "author" not in comments[0]
+        assert comments[0]["approved"]
 
-        comments = c_model.Comment.dictize_thread(th['id'], {'model': model, 'user': '', "include_author": True})
+        comments = c_model.Comment.dictize_thread(
+            th["id"], {"model": model, "user": "", "include_author": True}
+        )
         assert len(comments) == 1
-        assert 'author' in comments[0]
+        assert "author" in comments[0]
 
-        comments = c_model.Comment.dictize_thread(th['id'], {'model': model, 'user': user['name']})
+        comments = c_model.Comment.dictize_thread(
+            th["id"], {"model": model, "user": user["name"]}
+        )
         assert len(comments) == 2
-        assert comments[0]['approved']
-        assert not comments[1]['approved']
+        assert comments[0]["approved"]
+        assert not comments[1]["approved"]
 
-        comments = c_model.Comment.dictize_thread(th['id'], {'model': model, 'user': '', 'ignore_auth': True})
+        comments = c_model.Comment.dictize_thread(
+            th["id"], {"model": model, "user": "", "ignore_auth": True}
+        )
         assert len(comments) == 3
-        assert not comments[1]['approved']
-        assert not comments[2]['approved']
+        assert not comments[1]["approved"]
+        assert not comments[2]["approved"]
 
-        comments = c_model.Comment.dictize_thread(th['id'], {'model': model, 'user': sysadmin['name']})
+        comments = c_model.Comment.dictize_thread(
+            th["id"], {"model": model, "user": sysadmin["name"]}
+        )
         assert len(comments) == 3
 
     def test_get_author(self):
         user = factories.User()
-        comment = c_model.Comment(author_type='fairy')
+        comment = c_model.Comment(author_type="fairy")
         with pytest.raises(UnsupportedAuthorType):
             comment.get_author()
 
-        comment.author_type = 'user'
+        comment.author_type = "user"
         assert comment.get_author() is None
 
-        comment.author_id = user['id']
-        assert comment.get_author().name == user['name']
+        comment.author_id = user["id"]
+        assert comment.get_author().name == user["name"]

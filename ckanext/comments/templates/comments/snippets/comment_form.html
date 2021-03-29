@@ -3,15 +3,14 @@ subject_id
 subject_type
 #}
 
+{% import 'macros/form.html' as form %}
+
 <form class="form comment-form">
     <fieldset>
         <legend>{{ _('Leave a comment') }}</legend>
-        <input name="subject_id" type="hidden" value="{{ subject_id }}"/>
-        <input name="subject_type" type="hidden" value="{{ subject_type }}"/>
-        <div class="form-group control-full">
-            <label for="comment-content" class="control-label">{{ _('Content') }}</label>
-            <textarea required id="comment-content" name="content" class="form-control"></textarea>
-        </div>
+        {{ form.hidden('subject_id', subject_id) }}
+        {{ form.hidden('subject_type', subject_type) }}
+        {{ form.textarea('content', id='comment-content', label=_('Content')) }}
     </fieldset>
 
     <div class="form-group control-full">

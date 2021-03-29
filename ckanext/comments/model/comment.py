@@ -83,9 +83,11 @@ class Comment(Base):
 
     @classmethod
     def by_thread(cls, thread_id) -> Query:
-        query: Query = model.Session.query(cls).filter(
-            cls.thread_id == thread_id
-        ).order_by(cls.created_at)
+        query: Query = (
+            model.Session.query(cls)
+            .filter(cls.thread_id == thread_id)
+            .order_by(cls.created_at)
+        )
         return query
 
     def approve(self) -> None:
@@ -125,7 +127,7 @@ class Comment(Base):
             query = cast(Query, query.options(joinedload(cls.user)))
 
         approved_filter = cls.state == cls.State.approved
-        user = model.User.get(context['user'])
+        user = model.User.get(context["user"])
 
         if context.get("ignore_auth"):
             pass
@@ -142,7 +144,7 @@ class Comment(Base):
         for comment in query:
             assert isinstance(comment, cls)
             dictized = get_dictizer(cls)(comment, context)
-            dictized['approved'] = comment.is_approved()
+            dictized["approved"] = comment.is_approved()
             if include_author:
                 author = comment.user
                 dictized["author"] = author and get_dictizer(type(author))(

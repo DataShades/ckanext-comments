@@ -34,7 +34,7 @@ comment - dict
     </div>
     <div class="comment-body">
         <div class="comment-content">
-            {{ comment.content }}
+            {{ (comment.content)|replace('\n', '<br/>'|safe) }}
         </div>
     </div>
     <div class="comment-footer">
