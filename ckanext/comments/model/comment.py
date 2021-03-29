@@ -52,7 +52,7 @@ class Comment(Base):
     modified_at: Optional[datetime] = Column(DateTime, nullable=True)
 
     thread: Thread = relationship(
-        Thread, single_parent=True, cascade="all, delete-orphan"
+        Thread, single_parent=True
     )
 
     user: Optional[model.User] = relationship(
@@ -61,11 +61,10 @@ class Comment(Base):
         primaryjoin=(author_type == "user")
         & (model.User.id == foreign(author_id)),
         single_parent=True,
-        cascade="all, delete-orphan",
     )
 
     reply_to: Optional[Comment] = relationship(
-        "Comment", primaryjoin=id == reply_to_id, cascade="all, delete-orphan"
+        "Comment", primaryjoin=id == reply_to_id
     )
 
     def __repr__(self):

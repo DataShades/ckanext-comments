@@ -1,16 +1,47 @@
 
+.comments-comment {
+    border-bottom: 1px solid grey;
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
 .comment {
+    padding: 24px 0px;
     &.comment-sate-draft {}
     .comment-heading {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        margin-bottom: 11px;
         .comment-authored {
-            .comment-author {
-                .author-avatar {}
-                .author-name{}
+            display: flex;
+            flex: 1;
+            align-items: center;
+            margin-bottom: 11px;
+            margin-inline-end: 15px;
+            .author-avatar {
+                margin-inline-end: 8px;
             }
-            .comment-date{}
+            .comment-meta {
+                .author-name{
+                    font-size: 520px;
+                    font-size: 16px;
+                    line-height: 24px;
+                }
+                .comment-date{
+                    font-size: 12px;
+                    line-height: 22px;
+                    white-space: nowrap;
+                }
+            }
         }
         .comment-actions {
             .comment-action {
+                margin-inline-start: 16px;
+                &:first-child {
+                    margin-inline-start: 0;
+                }
                 &.approve-comment {}
                 &.remove-comment {}
             }
@@ -18,10 +49,20 @@
     }
     .comment-body {
         .comment-content {
+            font-size: 16px;
+            line-height: 24px;
             img {
                 max-width: 100%;
             }
         }
     }
     .comment-footer {}
+}
+
+@media (min-width: 769px) {
+    .comment {
+        .comment-heading {
+            // flex-direction: row;
+        }
+    }
 }

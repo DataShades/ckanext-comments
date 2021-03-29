@@ -12,7 +12,8 @@ ckan.module("comments-thread", function ($, _) {
         "click",
         this._onApproveComment
       );
-
+      this.$(".comment-actions .edit-comment").on("click", this._onEditComment);
+      this.$(".comment-actions .save-comment").on("click", this._onSaveComment);
       this.$(".comment-form").on("submit", this._onSubmit);
     },
     teardown: function () {
@@ -53,7 +54,31 @@ ckan.module("comments-thread", function ($, _) {
         }
       );
     },
-
+    _onEditComment: function (e) {
+      var target = $(e.currentTarget).hide();
+      target.parent().find(".save-comment").removeClass("hidden");
+      var content = target.closest(".comment").find(".comment-content");
+      console.log(content.text());
+      var textarea = $('<textarea rows="5" class="form-control">');
+      textarea.text(content.text());
+      content.replaceWith($('<div class="control-full">').append(textarea));
+    },
+    _onSaveComment: function (e) {
+      var id = e.currentTarget.dataset.id;
+      var target = $(e.currentTarget);
+      var content = target.closest(".comment").find(".comment-body textarea");
+      this.sandbox.client.call(
+        "POST",
+        "comments_comment_update",
+        {
+          id: id,
+          content: content.val(),
+        },
+        function () {
+          window.location.reload();
+        }
+      );
+    },
     _onSubmit: function (e) {
       e.preventDefault();
       var data = new FormData(e.target);

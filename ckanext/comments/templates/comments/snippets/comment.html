@@ -5,28 +5,40 @@ comment - dict
 <div class="comment comment-state-{{ comment.state }}">
     <div class="comment-heading">
         <div class="comment-authored">
-            <div class="comment-author">
-                <div class="author-avatar">
-                    {{ h.user_image(comment.author.name, size=22) }}
-                </div>
+            <div class="author-avatar">
+                {{ h.user_image(comment.author.name, size=26) }}
+            </div>
+
+            <div class="comment-meta">
                 <div class="author-name">
                     {{ comment.author.fullname or comment.author.name }}
                 </div>
-            </div>
-            <div class="comment-date">
-                {{ h.time_ago_from_timestamp(comment.modified_at or comment.created_at) }}
+                <div class="comment-date">
+                    {{ h.time_ago_from_timestamp(comment.modified_at or comment.created_at) }}
+                </div>
             </div>
         </div>
         <div class="comment-actions">
             {% if not comment.approved and h.check_access('comments_comment_approve', {id: comment.id}) %}
-                <button title="{{ _('Approve') }}" class="comment-action approve-comment" data-id="{{ comment.id }}">
+                <button title="{{ _('Approve') }}" class="btn comment-action approve-comment" data-id="{{ comment.id }}">
                     <i class="fa fa-check"></i>
                     <span class="text">{{ _('Approve') }}</span>
                 </button>
             {% endif %}
+            {% if not comment.approved and h.check_access('comments_comment_update', {id: comment.id}) %}
+                <button title="{{ _('Edit') }}" class="btn comment-action edit-comment" data-id="{{ comment.id }}">
+                    <i class="fa fa-edit"></i>
+                    <span class="text">{{ _('Edit') }}</span>
+                </button>
+                <button title="{{ _('Save') }}" class="btn comment-action save-comment hidden" data-id="{{ comment.id }}">
+                    <i class="fa fa-edit"></i>
+                    <span class="text">{{ _('Save') }}</span>
+                </button>
+            {% endif %}
+
             {% if h.check_access('comments_comment_delete', {id: comment.id}) %}
-                <button title="{{ _('Remove') }}" class="comment-action remove-comment" data-id="{{ comment.id }}">
-                    <i class="fa fa-remove"></i>
+                <button title="{{ _('Remove') }}" class="btn comment-action remove-comment" data-id="{{ comment.id }}">
+                    <i class="fa fa-trash-o"></i>
                     <span class="text">{{ _('Remove') }}</span>
                 </button>
             {% endif %}
@@ -34,7 +46,7 @@ comment - dict
     </div>
     <div class="comment-body">
         <div class="comment-content">
-            {{ (comment.content)|replace('\n', '<br/>'|safe) }}
+            {{- (comment.content)|replace('\n', '\n<br/>'|safe) -}}
         </div>
     </div>
     <div class="comment-footer">
