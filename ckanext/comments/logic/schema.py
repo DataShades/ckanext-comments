@@ -33,7 +33,9 @@ def thread_delete(not_empty):
 
 
 @validator_args
-def comment_create(not_empty, one_of, default, boolean_validator, ignore_missing):
+def comment_create(
+    not_empty, one_of, default, boolean_validator, ignore_missing
+):
     return {
         "subject_id": [
             not_empty,
@@ -45,9 +47,13 @@ def comment_create(not_empty, one_of, default, boolean_validator, ignore_missing
         "content": [
             not_empty,
         ],
-        'author_id': [ignore_missing,],
+        "author_id": [
+            ignore_missing,
+        ],
         "author_type": [default("user"), one_of(["user"])],
-        'reply_to': [ignore_missing,],
+        "reply_to_id": [
+            ignore_missing,
+        ],
         "create_thread": [default(False), boolean_validator],
     }
 

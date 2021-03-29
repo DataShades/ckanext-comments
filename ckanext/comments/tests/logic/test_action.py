@@ -1,3 +1,4 @@
+from ckanext.comments.logic.action import CONFIG_REQUIRE_APPROVAL
 import pytest
 
 import ckan.model as model
@@ -6,10 +7,8 @@ import ckan.tests.factories as factories
 from ckan.tests.helpers import call_action
 
 
-@pytest.mark.usefixtures("clean_db")
-class TestThread:
-    def test_thread_create(self):
-        dataset = factories.Dataset()
+class TestThreadCreate:
+    def test_cannot_create_thread_for_missing_object(self):
         with pytest.raises(tk.ObjectNotFound):
             call_action(
                 "comments_thread_create",
@@ -17,24 +16,40 @@ class TestThread:
                 subject_id="123-random",
             )
 
-        thread = call_action(
+    @pytest.mark.usefixtures("clean_db")
+    def test_thread_create(self):
+        dataset = factories.Dataset()
+        call_action(
             "comments_thread_create",
             subject_type="package",
             subject_id=dataset["id"],
         )
 
-    def test_thread_show(self, Thread, Comment):
-        user = factories.User()
-        t = Thread()
-        Comment(thread=t)
-        comment = Comment(thread=t)
-        call_action("comments_comment_approve", id=comment["id"])
+
+class TestThreadShow1:
+    def test_cannot_show_missing_thread(self):
         with pytest.raises(tk.ObjectNotFound):
             call_action(
                 "comments_thread_show",
                 subject_id="123-random",
                 subject_type="package",
             )
+
+    def test_missing_thread_with_init(self):
+        thread = call_action(
+            "comments_thread_show",
+            subject_id="123-random",
+            subject_type="package",
+            init_missing=True,
+        )
+        assert thread["id"] is None
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_thread_show(self, Thread, Comment):
+        t = Thread()
+        Comment(thread=t)
+        comment = Comment(thread=t)
+        call_action("comments_comment_approve", id=comment["id"])
         thread = call_action(
             "comments_thread_show",
             subject_id=t["subject_id"],
@@ -46,7 +61,7 @@ class TestThread:
 
         thread = call_action(
             "comments_thread_show",
-            {"ignore_auth": False, "user": user["name"]},
+            {"ignore_auth": False},
             subject_id=t["subject_id"],
             subject_type=t["subject_type"],
             include_comments=True,
@@ -54,11 +69,28 @@ class TestThread:
         assert len(thread["comments"]) == 1
         for c in thread["comments"]:
             assert c["state"] == "approved"
+            assert "author" not in c
 
-    def test_thread_delete(self, Thread):
-        thread = Thread()
+        thread = call_action(
+            "comments_thread_show",
+            {"ignore_auth": False},
+            subject_id=t["subject_id"],
+            subject_type=t["subject_type"],
+            include_comments=True,
+            include_author=True,
+        )
+        for c in thread["comments"]:
+            assert c["author"] is not None
+
+
+class TestThreadDelete:
+    def test_cannot_delete_missing_thread(self):
         with pytest.raises(tk.ObjectNotFound):
             call_action("comments_thread_delete", id="123-random")
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_thread_delete(self, Thread):
+        thread = Thread()
         call_action("comments_thread_delete", id=thread["id"])
         with pytest.raises(tk.ObjectNotFound):
             call_action(
@@ -68,21 +100,59 @@ class TestThread:
             )
 
 
-@pytest.mark.usefixtures("clean_db")
-class TestComment:
-    def test_comment_create(self, Thread):
-        user = factories.User()
-        thread = Thread()
-        content = "random content"
-
+class TestCommentCreate:
+    def test_missing_subject(self, Thread):
         with pytest.raises(tk.ObjectNotFound):
-            # author is required
+            call_action(
+                "comments_comment_create",
+                subject_id="random-id",
+                subject_type="package",
+                content="content",
+            )
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_missing_author(self, Thread):
+        thread = Thread()
+        with pytest.raises(tk.ObjectNotFound):
             call_action(
                 "comments_comment_create",
                 subject_id=thread["subject_id"],
                 subject_type=thread["subject_type"],
-                content=content,
+                content="content",
             )
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_controlled_author(self, Thread):
+        user = factories.User()
+        another_user = factories.User()
+        thread = Thread()
+        content = "random content"
+
+        comment = call_action(
+            "comments_comment_create",
+            {"user": user["name"], "ignore_auth": False},
+            subject_id=thread["subject_id"],
+            subject_type=thread["subject_type"],
+            content=content,
+            author_id=another_user["name"],
+        )
+        assert comment["author_id"] == user["id"]
+
+        comment = call_action(
+            "comments_comment_create",
+            {"user": user["name"], "ignore_auth": True},
+            subject_id=thread["subject_id"],
+            subject_type=thread["subject_type"],
+            content=content,
+            author_id=another_user["name"],
+        )
+        assert comment["author_id"] == another_user["id"]
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_comment_create(self, Thread):
+        user = factories.User()
+        thread = Thread()
+        content = "random content"
 
         comment = call_action(
             "comments_comment_create",
@@ -96,35 +166,90 @@ class TestComment:
         assert comment["author_id"] == user["id"]
         assert comment["thread_id"] == thread["id"]
 
-    def test_comment_show(self, Comment):
+    @pytest.mark.usefixtures("clean_db")
+    def test_missing_reply(self, Thread):
+        user = factories.User()
+        thread = Thread()
+        with pytest.raises(tk.ObjectNotFound):
+            call_action(
+                "comments_comment_create",
+                {"user": user["name"]},
+                subject_id=thread["subject_id"],
+                subject_type=thread["subject_type"],
+                content="content",
+                reply_to_id="missing-comment",
+            )
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_existing_reply(self, Thread, Comment):
+        user = factories.User()
+        thread = Thread()
+        comment = Comment(thread=thread)
+
+        reply = call_action(
+            "comments_comment_create",
+            {"user": user["name"]},
+            subject_id=thread["subject_id"],
+            subject_type=thread["subject_type"],
+            content="content",
+            reply_to_id=comment["id"],
+        )
+        assert reply["reply_to_id"] == comment["id"]
+
+    @pytest.mark.ckan_config(CONFIG_REQUIRE_APPROVAL, False)
+    @pytest.mark.usefixtures("clean_db")
+    def test_optional_approval(self, Comment):
+        comment = Comment()
+        assert comment["approved"]
+
+
+class TestCommentShow:
+    def test_missing_comment(self, Comment):
         with pytest.raises(tk.ObjectNotFound):
             call_action("comments_comment_show", id="not-exist")
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_comment_show(self, Comment):
         c = Comment()
         comment = call_action("comments_comment_show", id=c["id"])
         assert c == comment
 
-    def test_comment_approve(self, Comment):
+
+class TestCommentApprove:
+    def test_missing_comment(self, Comment):
         with pytest.raises(tk.ObjectNotFound):
             call_action("comments_comment_show", id="not-exists")
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_comment_approve(self, Comment):
         c = Comment()
         comment = call_action("comments_comment_approve", id=c["id"])
         assert comment["state"] == "approved"
 
-    def test_comment_delete(self, Comment):
+
+class TestCommentDelete:
+    def test_missing_comment(self, Comment):
         with pytest.raises(tk.ObjectNotFound):
             call_action("comments_comment_show", id="not-exist")
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_comment_delete(self, Comment):
         c = Comment()
         call_action("comments_comment_delete", id=c["id"])
         with pytest.raises(tk.ObjectNotFound):
             call_action("comments_comment_show", id=c["id"])
 
-    def test_comment_update(self, Comment):
-        content = "random content"
 
+class TestCommentUpdate:
+    def test_missing_comment(self, Comment):
         with pytest.raises(tk.ObjectNotFound):
             call_action(
-                "comments_comment_update", id="not-exist", content=content
+                "comments_comment_update", id="not-exist", content="content"
             )
+
+    @pytest.mark.usefixtures("clean_db")
+    def test_comment_update(self, Comment):
+        content = "random content"
         c = Comment()
 
         call_action("comments_comment_update", id=c["id"], content=content)

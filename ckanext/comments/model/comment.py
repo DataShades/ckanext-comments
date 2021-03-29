@@ -3,18 +3,16 @@ from __future__ import annotations
 import logging
 
 from datetime import datetime
-from typing import Any, Callable, Optional, Union, cast
+from typing import Callable, Optional, Union
 
 from sqlalchemy import Column, DateTime, Text, ForeignKey
-from sqlalchemy.orm import relationship, foreign, Query, joinedload
+from sqlalchemy.orm import relationship, foreign, Query
 
 import ckan.model as model
 
-import ckan.plugins.toolkit as tk
 from ckan.model.types import make_uuid
 
 from .base import Base
-from .dictize import get_dictizer
 from . import Thread
 from ckanext.comments.exceptions import UnsupportedAuthorType
 
@@ -100,59 +98,6 @@ class Comment(Base):
         if self.user:
             return name == self.user.name or name == self.user.id
         return False
-
-    def dictize(self, context: dict[str, Any]) -> dict[str, Any]:
-        extra: dict[str, Any] = {"approved": self.is_approved()}
-
-        if context.get("include_author"):
-            author = self.get_author()
-            if author:
-                extra["author"] = get_dictizer(type(author))(
-                    author, context.copy()
-                )
-            else:
-                log.error("Missing author for comment: %s", self)
-                extra["author"] = None
-        return get_dictizer(type(self))(self, context.copy(), **extra)
-
-    @classmethod
-    def dictize_thread(
-        cls, id_: str, context: dict[str, Any]
-    ) -> list[dict[str, Any]]:
-        query = cls.by_thread(id_)
-        include_author = tk.asbool(context.get("include_author"))
-
-        # let's make it a bit more efficient
-        if include_author:
-            query = cast(Query, query.options(joinedload(cls.user)))
-
-        approved_filter = cls.state == cls.State.approved
-        user = model.User.get(context["user"])
-
-        if context.get("ignore_auth"):
-            pass
-        elif user is None:
-            query = cast(Query, query.filter(approved_filter))
-        elif not user.sysadmin:
-            own_filter = (cls.author_type == "user") & (
-                cls.author_id == user.id
-            )
-            query = cast(Query, query.filter(approved_filter | own_filter))
-
-        result_list = []
-
-        for comment in query:
-            assert isinstance(comment, cls)
-            dictized = get_dictizer(cls)(comment, context)
-            dictized["approved"] = comment.is_approved()
-            if include_author:
-                author = comment.user
-                dictized["author"] = author and get_dictizer(type(author))(
-                    author, context
-                )
-            result_list.append(dictized)
-
-        return result_list
 
     def get_author(self) -> Optional[Author]:
         try:

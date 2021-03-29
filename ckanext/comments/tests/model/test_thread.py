@@ -2,7 +2,6 @@ import pytest
 
 import ckan.model as model
 import ckan.tests.factories as factories
-from ckan.tests.helpers import call_action
 
 import ckanext.comments.model as c_model
 from ckanext.comments.exceptions import UnsupportedSubjectType
@@ -49,25 +48,3 @@ class TestThread:
         assert th.id is None
         assert th.subject_type == "package"
         assert th.subject_id == dataset["id"]
-
-    def test_dictize(self, Thread, Comment):
-        thread = Thread()
-        comment = Comment(thread=thread)
-        call_action("comments_comment_approve", id=comment["id"])
-        dataset = factories.Dataset()
-
-        th = (
-            model.Session.query(c_model.Thread)
-            .filter_by(id=thread["id"])
-            .one()
-        )
-        dictized = th.dictize({"model": model, "user": ""})
-        assert thread == dictized
-
-        dictized = th.dictize(
-            {"model": model, "user": "", "include_comments": True}
-        )
-        comments = dictized.pop("comments")
-        dictized["comments"] = None
-        assert thread == dictized
-        assert len(comments) == 1

@@ -5,6 +5,7 @@ from ckan.logic import validate
 
 import ckanext.comments.logic.schema as schema
 from ckanext.comments.model import Thread, Comment
+from ckanext.comments.model.dictize import get_dictizer
 
 CONFIG_REQUIRE_APPROVAL = "ckanext.comments.require_approval"
 
@@ -45,7 +46,7 @@ def thread_create(context, data_dict):
 
     model.Session.add(thread)
     model.Session.commit()
-    thread_dict = thread.dictize(context)
+    thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
 
 
@@ -63,7 +64,7 @@ def thread_show(context, data_dict):
     context["include_comments"] = data_dict["include_comments"]
     context["include_author"] = data_dict["include_author"]
 
-    thread_dict = thread.dictize(context)
+    thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
 
 
@@ -80,7 +81,7 @@ def thread_delete(context, data_dict):
         raise tk.ObjectNotFound("Thread not found")
     model.Session.delete(thread)
     model.Session.commit()
-    thread_dict = thread.dictize(context)
+    thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
 
 
@@ -112,14 +113,14 @@ def comment_create(context, data_dict):
     if not author_id or not can_set_author_id:
         author_id = context["user"]
 
-    reply_to_id = data_dict.get("reply_to")
+    reply_to_id = data_dict.get("reply_to_id")
     if reply_to_id:
         parent = tk.get_action("comments_comment_show")(
             context.copy(), {"id": reply_to_id}
         )
         if parent["thread_id"] != thread_dict["id"]:
             raise tk.ValidationError(
-                {"reply_to": ["Coment is owned by different thread"]}
+                {"reply_to_id": ["Coment is owned by different thread"]}
             )
 
     comment = Comment(
@@ -140,7 +141,7 @@ def comment_create(context, data_dict):
         comment.approve()
     model.Session.add(comment)
     model.Session.commit()
-    comment_dict = comment.dictize(context)
+    comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict
 
 
@@ -155,7 +156,7 @@ def comment_show(context, data_dict):
     )
     if comment is None:
         raise tk.ObjectNotFound("Comment not found")
-    comment_dict = comment.dictize(context)
+    comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict
 
 
@@ -173,7 +174,7 @@ def comment_approve(context, data_dict):
     comment.approve()
     model.Session.commit()
 
-    comment_dict = comment.dictize(context)
+    comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict
 
 
@@ -190,7 +191,7 @@ def comment_delete(context, data_dict):
         raise tk.ObjectNotFound("Comment not found")
     model.Session.delete(comment)
     model.Session.commit()
-    comment_dict = comment.dictize(context)
+    comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict
 
 
@@ -208,5 +209,5 @@ def comment_update(context, data_dict):
         raise tk.ObjectNotFound("Comment not found")
     comment.content = data_dict["content"]
     model.Session.commit()
-    comment_dict = comment.dictize(context)
+    comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict

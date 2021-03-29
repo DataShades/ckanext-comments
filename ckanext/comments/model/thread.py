@@ -12,7 +12,6 @@ import ckan.model as model
 
 from ckan.model.types import make_uuid
 
-from .dictize import get_dictizer
 from .base import Base
 from ckanext.comments.exceptions import UnsupportedSubjectType
 
@@ -76,14 +75,3 @@ class Thread(Base):
         if thread is None and init_missing:
             thread = cls(subject_type=type_, subject_id=id_)
         return thread
-
-    def dictize(self, context: dict) -> dict:
-        from .comment import Comment
-
-        comments_dictized = None
-        if context.get("include_comments"):
-            comments_dictized = Comment.dictize_thread(self.id, context)
-
-        return get_dictizer(type(self))(
-            self, context, comments=comments_dictized
-        )
