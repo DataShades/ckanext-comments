@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import ckan.lib.dictization as d
 import ckan.plugins.toolkit as tk
 import ckan.model as model
@@ -212,6 +214,7 @@ def comment_update(context, data_dict):
     if comment is None:
         raise tk.ObjectNotFound("Comment not found")
     comment.content = data_dict["content"]
+    comment.modified_at = datetime.utcnow()
     model.Session.commit()
     comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict

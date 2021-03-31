@@ -1,4 +1,4 @@
-ckan.module("comments-thread", function ($, _) {
+ckan.module("comments-thread", function ($) {
   "use strict";
 
   return {
@@ -66,6 +66,8 @@ ckan.module("comments-thread", function ($, _) {
     _onSaveComment: function (e) {
       var id = e.currentTarget.dataset.id;
       var target = $(e.currentTarget);
+      var notify = this.sandbox.notify;
+      var _ = this.sandbox.translate;
       var content = target.closest(".comment").find(".comment-body textarea");
       this.sandbox.client.call(
         "POST",
@@ -76,6 +78,18 @@ ckan.module("comments-thread", function ($, _) {
         },
         function () {
           window.location.reload();
+        },
+        function (err) {
+          console.log(err);
+          var oldEl = notify.el;
+          notify.el = target.closest(".comment");
+          notify(
+            _("An Error Occurred").fetch(),
+            _("Comment cannot be updated").fetch(),
+            "error"
+          );
+          notify.el.find(".alert .close").attr("data-dismiss", "alert");
+          notify.el = oldEl;
         }
       );
     },

@@ -25,7 +25,7 @@ comment - dict
                     <span class="text">{{ _('Approve') }}</span>
                 </button>
             {% endif %}
-            {% if not comment.approved and h.check_access('comments_comment_update', {id: comment.id}) %}
+            {% if h.check_access('comments_comment_update', comment) %}
                 <button title="{{ _('Edit') }}" class="btn comment-action edit-comment" data-id="{{ comment.id }}">
                     <i class="fa fa-edit"></i>
                     <span class="text">{{ _('Edit') }}</span>
@@ -36,7 +36,7 @@ comment - dict
                 </button>
             {% endif %}
 
-            {% if h.check_access('comments_comment_delete', {id: comment.id}) %}
+            {% if h.check_access('comments_comment_delete', comment) %}
                 <button title="{{ _('Remove') }}" class="btn comment-action remove-comment" data-id="{{ comment.id }}">
                     <i class="fa fa-trash-o"></i>
                     <span class="text">{{ _('Remove') }}</span>

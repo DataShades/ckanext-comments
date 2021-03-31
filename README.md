@@ -44,6 +44,21 @@ To install ckanext-comments:
 	# (optional, default: true).
 	ckanext.comments.require_approval = false
 
+	# Editor(admin) can edit draft comments
+	# (optional, default: true).
+    ckanext.comments.draft_edits = true
+
+	# Editor(admin) can edit approved comments
+	# (optional, default: false).
+    ckanext.comments.approved_edits = false
+
+	# Author can edit own draft comments
+	# (optional, default: false).
+    ckanext.comments.draft_edits_by_author = false
+
+	# Author can edit own approved comments
+	# (optional, default: false).
+    ckanext.comments.approved_edits_by_author = false
 
 ## Developer installation
 

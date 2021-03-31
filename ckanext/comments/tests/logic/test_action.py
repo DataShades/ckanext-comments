@@ -253,8 +253,11 @@ class TestCommentUpdate:
         content = "random content"
         c = Comment()
 
+        assert c["modified_at"] is None
+
         call_action("comments_comment_update", id=c["id"], content=content)
         comment = call_action("comments_comment_show", id=c["id"])
 
         assert comment["content"] != c["content"]
         assert comment["content"] == content
+        assert comment["modified_at"] > comment["created_at"]

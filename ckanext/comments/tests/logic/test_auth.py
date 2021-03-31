@@ -57,12 +57,6 @@ class TestAuth:
         user_ctx = {"model": model, "user": user["name"]}
         another_user_ctx = {"model": model, "user": factories.User()["name"]}
         comment = Comment(user=user)
-        with pytest.raises(tk.NotAuthorized):
-            call_auth(
-                "comments_comment_update",
-                another_user_ctx.copy(),
-                id=comment["id"],
-            )
 
         with pytest.raises(tk.NotAuthorized):
             assert call_auth(
@@ -72,6 +66,41 @@ class TestAuth:
         monkeypatch.setitem(
             ckan_config, const.CONFIG_DRAFT_EDITS_BY_AUTHOR, True
         )
+
+        with pytest.raises(tk.NotAuthorized):
+            call_auth(
+                "comments_comment_update",
+                another_user_ctx.copy(),
+                id=comment["id"],
+            )
+        assert call_auth(
+            "comments_comment_update", user_ctx.copy(), id=comment["id"]
+        )
+
+        call_action("comments_comment_approve", id=comment["id"])
+
+        with pytest.raises(tk.NotAuthorized):
+            call_auth(
+                "comments_comment_update",
+                user_ctx.copy(),
+                id=comment["id"],
+            )
+        with pytest.raises(tk.NotAuthorized):
+            call_auth(
+                "comments_comment_update",
+                another_user_ctx.copy(),
+                id=comment["id"],
+            )
+
+        monkeypatch.setitem(
+            ckan_config, const.CONFIG_APPROVED_EDITS_BY_AUTHOR, True
+        )
+        with pytest.raises(tk.NotAuthorized):
+            call_auth(
+                "comments_comment_update",
+                another_user_ctx.copy(),
+                id=comment["id"],
+            )
 
         assert call_auth(
             "comments_comment_update", user_ctx.copy(), id=comment["id"]

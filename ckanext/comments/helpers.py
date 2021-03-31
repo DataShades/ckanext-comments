@@ -4,7 +4,8 @@ from typing import Any, Optional
 
 import ckan.plugins.toolkit as tk
 
-from ckanext.comments.model import Comment
+import ckanext.comments.const as const
+
 
 _helpers = {}
 
