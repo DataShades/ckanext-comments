@@ -4,6 +4,7 @@ import ckan.model as model
 import ckan.plugins.toolkit as tk
 import ckan.tests.factories as factories
 from ckan.tests.helpers import call_auth, call_action
+import ckanext.comments.const as const
 
 
 @pytest.mark.usefixtures("clean_db")
@@ -17,7 +18,6 @@ class TestAuth:
             ("comment_create", (False, True, True)),
             ("comment_approve", (False, False, True)),
             ("comment_delete", (False, False, True)),
-            ("comment_update", (False, False, True)),
         ],
     )
     def test_basic_permissions(self, func, results):
@@ -50,4 +50,29 @@ class TestAuth:
         )
         assert call_auth(
             "comments_comment_show", user_ctx.copy(), id=comment["id"]
+        )
+
+    def test_comment_update(self, Comment, monkeypatch, ckan_config):
+        user = factories.User()
+        user_ctx = {"model": model, "user": user["name"]}
+        another_user_ctx = {"model": model, "user": factories.User()["name"]}
+        comment = Comment(user=user)
+        with pytest.raises(tk.NotAuthorized):
+            call_auth(
+                "comments_comment_update",
+                another_user_ctx.copy(),
+                id=comment["id"],
+            )
+
+        with pytest.raises(tk.NotAuthorized):
+            assert call_auth(
+                "comments_comment_update", user_ctx.copy(), id=comment["id"]
+            )
+
+        monkeypatch.setitem(
+            ckan_config, const.CONFIG_DRAFT_EDITS_BY_AUTHOR, True
+        )
+
+        assert call_auth(
+            "comments_comment_update", user_ctx.copy(), id=comment["id"]
         )

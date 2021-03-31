@@ -1,6 +1,7 @@
 import ckan.plugins.toolkit as tk
 import ckan.model as model
 from ckanext.comments.model import Comment
+import ckanext.comments.const as const
 
 _auth = {}
 
@@ -40,9 +41,10 @@ def comment_create(context, data_dict):
 @tk.auth_allow_anonymous_access
 def comment_show(context, data_dict):
     id = tk.get_or_bust(data_dict, "id")
-    comment: Comment = (
+    comment = (
         model.Session.query(Comment).filter(Comment.id == id).one_or_none()
     )
+
     if not comment:
         raise tk.ObjectNotFound("Comment not found")
     return {
@@ -63,4 +65,20 @@ def comment_delete(context, data_dict):
 
 @auth
 def comment_update(context, data_dict):
-    return {"success": False}
+    if not tk.asbool(
+        tk.config.get(
+            const.CONFIG_DRAFT_EDITS_BY_AUTHOR,
+            const.DEFAULT_DRAFT_EDITS_BY_AUTHOR,
+        )
+    ):
+        return {"success": False}
+
+    id = tk.get_or_bust(data_dict, "id")
+    comment = (
+        model.Session.query(Comment).filter(Comment.id == id).one_or_none()
+    )
+
+    if not comment:
+        raise tk.ObjectNotFound("Comment not found")
+
+    return {"success": comment.is_authored_by(context["user"])}

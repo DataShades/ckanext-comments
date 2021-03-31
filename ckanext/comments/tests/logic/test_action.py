@@ -1,10 +1,11 @@
-from ckanext.comments.logic.action import CONFIG_REQUIRE_APPROVAL
 import pytest
 
 import ckan.model as model
 import ckan.plugins.toolkit as tk
 import ckan.tests.factories as factories
 from ckan.tests.helpers import call_action
+
+import ckanext.comments.const as const
 
 
 class TestThreadCreate:
@@ -196,7 +197,7 @@ class TestCommentCreate:
         )
         assert reply["reply_to_id"] == comment["id"]
 
-    @pytest.mark.ckan_config(CONFIG_REQUIRE_APPROVAL, False)
+    @pytest.mark.ckan_config(const.CONFIG_REQUIRE_APPROVAL, False)
     @pytest.mark.usefixtures("clean_db")
     def test_optional_approval(self, Comment):
         comment = Comment()

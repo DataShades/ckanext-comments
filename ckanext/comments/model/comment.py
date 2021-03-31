@@ -51,9 +51,7 @@ class Comment(Base):
     )
     modified_at: Optional[datetime] = Column(DateTime, nullable=True)
 
-    thread: Thread = relationship(
-        Thread, single_parent=True
-    )
+    thread: Thread = relationship(Thread, single_parent=True)
 
     user: Optional[model.User] = relationship(
         model.User,

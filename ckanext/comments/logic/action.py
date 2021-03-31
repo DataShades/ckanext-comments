@@ -7,7 +7,7 @@ import ckanext.comments.logic.schema as schema
 from ckanext.comments.model import Thread, Comment
 from ckanext.comments.model.dictize import get_dictizer
 
-CONFIG_REQUIRE_APPROVAL = "ckanext.comments.require_approval"
+import ckanext.comments.const as const
 
 _actions = {}
 
@@ -137,7 +137,11 @@ def comment_create(context, data_dict):
     # make sure we are not messing up with name_or_id
     comment.author_id = author.id
 
-    if not tk.asbool(tk.config.get(CONFIG_REQUIRE_APPROVAL, True)):
+    if not tk.asbool(
+        tk.config.get(
+            const.CONFIG_REQUIRE_APPROVAL, const.DEFAULT_REQUIRE_APPROVAL
+        )
+    ):
         comment.approve()
     model.Session.add(comment)
     model.Session.commit()
