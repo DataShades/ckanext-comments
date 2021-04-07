@@ -1,6 +1,6 @@
 import logging
-import ckan.plugins.toolkit as tk
 import ckan.model as model
+import ckan.plugins.toolkit as tk
 from ckanext.comments.model import Comment
 import ckanext.comments.const as const
 
@@ -81,7 +81,7 @@ def comment_create(context, data_dict):
 def comment_show(context, data_dict):
     id = tk.get_or_bust(data_dict, "id")
     comment = (
-        model.Session.query(Comment).filter(Comment.id == id).one_or_none()
+        context['session'].query(Comment).filter(Comment.id == id).one_or_none()
     )
 
     if not comment:
@@ -106,7 +106,7 @@ def comment_delete(context, data_dict):
 def comment_update(context, data_dict):
     id = tk.get_or_bust(data_dict, "id")
     comment = (
-        model.Session.query(Comment).filter(Comment.id == id).one_or_none()
+        context['session'].query(Comment).filter(Comment.id == id).one_or_none()
     )
 
     if not comment:

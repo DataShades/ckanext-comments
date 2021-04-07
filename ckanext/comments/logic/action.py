@@ -2,7 +2,6 @@ from datetime import datetime
 
 import ckan.lib.dictization as d
 import ckan.plugins.toolkit as tk
-import ckan.model as model
 from ckan.logic import validate
 
 import ckanext.comments.logic.schema as schema
@@ -46,8 +45,8 @@ def thread_create(context, data_dict):
     # make sure we are not messing up with name_or_id
     thread.subject_id = subject.id
 
-    model.Session.add(thread)
-    model.Session.commit()
+    context['session'].add(thread)
+    context['session'].commit()
     thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
 
@@ -75,14 +74,14 @@ def thread_show(context, data_dict):
 def thread_delete(context, data_dict):
     tk.check_access("comments_thread_delete", context, data_dict)
     thread = (
-        model.Session.query(Thread)
+        context['session'].query(Thread)
         .filter(Thread.id == data_dict["id"])
         .one_or_none()
     )
     if thread is None:
         raise tk.ObjectNotFound("Thread not found")
-    model.Session.delete(thread)
-    model.Session.commit()
+    context['session'].delete(thread)
+    context['session'].commit()
     thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
 
@@ -145,8 +144,8 @@ def comment_create(context, data_dict):
         )
     ):
         comment.approve()
-    model.Session.add(comment)
-    model.Session.commit()
+    context['session'].add(comment)
+    context['session'].commit()
     comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict
 
@@ -156,7 +155,7 @@ def comment_create(context, data_dict):
 def comment_show(context, data_dict):
     tk.check_access("comments_comment_show", context, data_dict)
     comment = (
-        model.Session.query(Comment)
+        context['session'].query(Comment)
         .filter(Comment.id == data_dict["id"])
         .one_or_none()
     )
@@ -171,14 +170,14 @@ def comment_show(context, data_dict):
 def comment_approve(context, data_dict):
     tk.check_access("comments_comment_approve", context, data_dict)
     comment = (
-        model.Session.query(Comment)
+        context['session'].query(Comment)
         .filter(Comment.id == data_dict["id"])
         .one_or_none()
     )
     if comment is None:
         raise tk.ObjectNotFound("Comment not found")
     comment.approve()
-    model.Session.commit()
+    context['session'].commit()
 
     comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict
@@ -189,14 +188,14 @@ def comment_approve(context, data_dict):
 def comment_delete(context, data_dict):
     tk.check_access("comments_comment_delete", context, data_dict)
     comment = (
-        model.Session.query(Comment)
+        context['session'].query(Comment)
         .filter(Comment.id == data_dict["id"])
         .one_or_none()
     )
     if comment is None:
         raise tk.ObjectNotFound("Comment not found")
-    model.Session.delete(comment)
-    model.Session.commit()
+    context['session'].delete(comment)
+    context['session'].commit()
     comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict
 
@@ -206,7 +205,7 @@ def comment_delete(context, data_dict):
 def comment_update(context, data_dict):
     tk.check_access("comments_comment_update", context, data_dict)
     comment = (
-        model.Session.query(Comment)
+        context['session'].query(Comment)
         .filter(Comment.id == data_dict["id"])
         .one_or_none()
     )
@@ -215,6 +214,6 @@ def comment_update(context, data_dict):
         raise tk.ObjectNotFound("Comment not found")
     comment.content = data_dict["content"]
     comment.modified_at = datetime.utcnow()
-    model.Session.commit()
+    context['session'].commit()
     comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict
