@@ -20,13 +20,13 @@ comment - dict
         </div>
         <div class="comment-actions">
             {% if not comment.approved and h.check_access('comments_comment_approve', {id: comment.id}) %}
-                <button title="{{ _('Approve') }}" class="btn comment-action approve-comment" data-id="{{ comment.id }}">
+                <button title="{{ _('Approve') }}" class="btn btn-outline-success comment-action approve-comment" data-id="{{ comment.id }}">
                     <i class="fa fa-check"></i>
                     <span class="text">{{ _('Approve') }}</span>
                 </button>
             {% endif %}
             {% if h.check_access('comments_comment_update', comment) %}
-                <button title="{{ _('Edit') }}" class="btn comment-action edit-comment" data-id="{{ comment.id }}">
+                <button title="{{ _('Edit') }}" class="btn btn-default comment-action edit-comment" data-id="{{ comment.id }}">
                     <i class="fa fa-edit"></i>
                     <span class="text">{{ _('Edit') }}</span>
                 </button>
@@ -37,10 +37,11 @@ comment - dict
             {% endif %}
 
             {% if h.check_access('comments_comment_delete', comment) %}
-                <button title="{{ _('Remove') }}" class="btn comment-action remove-comment" data-id="{{ comment.id }}">
+                <button type="button" class="btn btn-remove comment-action" data-toggle="modal" data-target="#confirmation-modal">
                     <i class="fa fa-trash-o"></i>
                     <span class="text">{{ _('Remove') }}</span>
                 </button>
+                {% snippet 'comments/snippets/confirmation.html', comment_id=comment.id %}
             {% endif %}
         </div>
     </div>

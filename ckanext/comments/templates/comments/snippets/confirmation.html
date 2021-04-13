@@ -1,0 +1,28 @@
+{#
+comment_id - comment id to remove
+
+{% snippet 'comments/snippets/confirmation.html', comment_id=comment.id %}
+#}
+
+
+<div class="modal fade bd-example-modal-sm" id="confirmation-modal" tabindex="-1" role="dialog" aria-labelledby="confirmation-modal-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmation-modal-label">{{ _('Confirmation window') }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <span>{{ _('Are you sure you want to permanently delete this comment?') }}</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ _('Cancel') }}</button>
+        <button title="{{ _('Remove') }}" class="btn btn-danger remove-comment" data-id="{{ comment_id }}">
+            <span class="text">{{ _('Remove') }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
