@@ -8,6 +8,7 @@ from ckan.tests.helpers import call_action
 import ckanext.comments.const as const
 
 
+@pytest.mark.usefixtures('clean_db')
 class TestThreadCreate:
     def test_cannot_create_thread_for_missing_object(self):
         with pytest.raises(tk.ObjectNotFound):
@@ -27,7 +28,7 @@ class TestThreadCreate:
         )
 
 
-class TestThreadShow1:
+class TestThreadShow:
     def test_cannot_show_missing_thread(self):
         with pytest.raises(tk.ObjectNotFound):
             call_action(
@@ -168,20 +169,6 @@ class TestCommentCreate:
         assert comment["thread_id"] == thread["id"]
 
     @pytest.mark.usefixtures("clean_db")
-    def test_missing_reply(self, Thread):
-        user = factories.User()
-        thread = Thread()
-        with pytest.raises(tk.ObjectNotFound):
-            call_action(
-                "comments_comment_create",
-                {"user": user["name"]},
-                subject_id=thread["subject_id"],
-                subject_type=thread["subject_type"],
-                content="content",
-                reply_to_id="missing-comment",
-            )
-
-    @pytest.mark.usefixtures("clean_db")
     def test_existing_reply(self, Thread, Comment):
         user = factories.User()
         thread = Thread()
@@ -196,6 +183,22 @@ class TestCommentCreate:
             reply_to_id=comment["id"],
         )
         assert reply["reply_to_id"] == comment["id"]
+        comments = call_action('comments_thread_show',
+                               subject_id=thread['subject_id'],
+                               subject_type=thread['subject_type'],
+                               include_comments=True)
+        assert len(comments['comments']) == 2
+        assert not any('replies' in c for c in comments['comments'])
+        comments = call_action('comments_thread_show',
+                               subject_id=comments['subject_id'],
+                               subject_type=comments['subject_type'],
+                               include_comments=True,
+                               combine_comments=True)
+        assert len(comments['comments']) == 1
+        top = comments['comments'][0]
+        assert top['id']  == comment['id']
+        assert len(top['replies']) == 1
+        assert top['replies'][0]['id'] == reply['id']
 
     @pytest.mark.ckan_config(const.CONFIG_REQUIRE_APPROVAL, False)
     @pytest.mark.usefixtures("clean_db")

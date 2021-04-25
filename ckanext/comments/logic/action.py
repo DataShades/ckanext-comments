@@ -63,8 +63,8 @@ def thread_show(context, data_dict):
     if thread is None:
         raise tk.ObjectNotFound("Thread not found")
     context["include_comments"] = data_dict["include_comments"]
+    context["combine_comments"] = data_dict["combine_comments"]
     context["include_author"] = data_dict["include_author"]
-
     thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
 

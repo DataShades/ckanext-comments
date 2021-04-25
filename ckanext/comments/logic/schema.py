@@ -1,4 +1,5 @@
 from ckan.logic.schema import validator_args
+import ckan.plugins.toolkit as tk
 
 
 @validator_args
@@ -22,6 +23,7 @@ def thread_show(default, boolean_validator):
             "init_missing": [default(False), boolean_validator],
             "include_comments": [default(False), boolean_validator],
             "include_author": [default(False), boolean_validator],
+            "combine_comments": [default(False), boolean_validator],
         }
     )
     return schema
@@ -53,6 +55,7 @@ def comment_create(
         "author_type": [default("user"), one_of(["user"])],
         "reply_to_id": [
             ignore_missing,
+            tk.get_validator('comments_comment_exists'),
         ],
         "create_thread": [default(False), boolean_validator],
     }
