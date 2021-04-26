@@ -77,6 +77,11 @@ def comment_create(context, data_dict):
 
 
 @auth
+def reply_create(context, data_dict):
+    return {"success": True}
+
+
+@auth
 @tk.auth_allow_anonymous_access
 def comment_show(context, data_dict):
     id = tk.get_or_bust(data_dict, "id")

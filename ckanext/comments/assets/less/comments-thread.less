@@ -1,13 +1,22 @@
 
+.comments-thread {
+    .comments-thread {
+	padding-inline-start: 15px;
+	border-inline-start: 1px solid grey;
+    }
+}
 .comments-comment {
     border-bottom: 1px solid grey;
     &:last-child {
         border-bottom: none;
     }
+    &.mobile-hidden-comment {
+	border-bottom: none;
+    }
 }
 
 .comment {
-    padding: 24px 0px;
+    padding: 24px 0px 13px;
     &.comment-sate-draft {}
     .comment-heading {
         display: flex;
@@ -38,9 +47,10 @@
         }
         .comment-actions {
             .comment-action {
-                margin-inline-start: 16px;
-                &:first-child {
-                    margin-inline-start: 0;
+                margin-inline-end: 16px;
+		margin-bottom: 16px;
+                &:last-child {
+                    margin-inline-end: 0;
                 }
                 &.approve-comment {}
                 &.remove-comment {}
@@ -48,6 +58,7 @@
         }
     }
     .comment-body {
+	margin-bottom: 11px;
         .comment-content {
             font-size: 16px;
             line-height: 24px;
@@ -56,7 +67,18 @@
             }
         }
     }
-    .comment-footer {}
+    .comment-footer {
+        .reply-actions {
+            .reply-action {
+		margin-top: 10px;
+                margin-inline-end: 16px;
+		margin-bottom: 16px;
+                &:last-child {
+                    margin-inline-end: 0;
+                }
+	    }
+	}
+    }
 }
 
 @media (min-width: 769px) {

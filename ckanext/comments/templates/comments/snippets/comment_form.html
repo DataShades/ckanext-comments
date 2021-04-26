@@ -1,6 +1,4 @@
 {#
-subject_id
-subject_type
 #}
 
 {% import 'macros/form.html' as form %}
@@ -8,8 +6,6 @@ subject_type
 <form class="form comment-form">
     <fieldset>
         <legend>{{ _('Leave a comment') }}</legend>
-        {{ form.hidden('subject_id', subject_id) }}
-        {{ form.hidden('subject_type', subject_type) }}
         {{ form.textarea('content', id='comment-content', label=_('Content')) }}
     </fieldset>
 

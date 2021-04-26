@@ -60,6 +60,10 @@ To install ckanext-comments:
 	# (optional, default: false).
     ckanext.comments.approved_edits_by_author = false
 
+	# Number of reply levels that are shown on mobile layout
+	# (optional, default: 3).
+    ckanext.comments.mobile_depth_threshold = 3
+
 ## Developer installation
 
 To install ckanext-comments for development, activate your CKAN virtualenv and

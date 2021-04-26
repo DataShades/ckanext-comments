@@ -12,10 +12,12 @@ class TestAuth:
     @pytest.mark.parametrize(
         "func,results",
         [
+            #  auth, (anon, user, admin)
             ("thread_create", (False, True, True)),
             ("thread_show", (True, True, True)),
             ("thread_delete", (False, False, True)),
             ("comment_create", (False, True, True)),
+            ("reply_create", (False, True, True)),
             ("comment_approve", (False, False, True)),
             ("comment_delete", (False, False, True)),
         ],

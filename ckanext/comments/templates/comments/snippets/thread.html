@@ -10,7 +10,7 @@ subject_type - type of the subject for thread
 {% asset 'comments/comments-thread' %}
 {% asset 'comments/comments-thread-styles' %}
 
-<div data-module="comments-thread">
+<div data-module="comments-thread" data-module-subject-id="{{ thread.subject_id }}" data-module-subject-type="{{ thread.subject_type }}">
     {% if thread.comments %}
         <h3 class="heading">{{ _('Comments') }}</h3>
         {% snippet 'comments/snippets/comments_list.html', comments=thread.comments %}

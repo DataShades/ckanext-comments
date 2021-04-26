@@ -1,14 +1,24 @@
 {#
-comments - list of the comments to display
-#}
+  comments - list of the comments to display
+  mobile_depth
+  #}
+{% if mobile_depth is not defined %}
+  {% set mobile_depth = h.comments_mobile_depth_threshold() %}
+{% endif %}
 
 <ul class="list-unstyled comments-thread">
-    {% for comment in comments recursive %}
-        <li class="comments-comment">
-            {% snippet 'comments/snippets/comment.html', comment=comment %}
+
+  {% for comment in comments recursive %}
+    {% if loop.depth > mobile_depth %}
+      <li class="comments-comment mobile-hidden-comment visible-xs">...</li>
+    {% endif %}
+    <li class="comments-comment {% if loop.depth > mobile_depth %} hidden-xs{% endif %}">
+      {% snippet 'comments/snippets/comment.html', comment=comment %}
 	    {% if comment.replies %}
-		{{ loop(comment.replies }}
+        <ul class="list-unstyled comments-thread">
+		      {{ loop(comment.replies) }}
+        </ul>
 	    {% endif %}
-        </li>
-    {% endfor %}
+    </li>
+  {% endfor %}
 </ul>
