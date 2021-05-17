@@ -16,7 +16,7 @@ def thread_create(not_empty, one_of):
 
 
 @validator_args
-def thread_show(default, boolean_validator):
+def thread_show(default, boolean_validator, ignore_missing, isodate):
     schema = thread_create()
     schema.update(
         {
@@ -24,6 +24,7 @@ def thread_show(default, boolean_validator):
             "include_comments": [default(False), boolean_validator],
             "include_author": [default(False), boolean_validator],
             "combine_comments": [default(False), boolean_validator],
+            "after_date": [ignore_missing, isodate],
         }
     )
     return schema

@@ -1,4 +1,5 @@
 import pytest
+import datetime as dt
 
 import ckan.model as model
 import ckan.plugins.toolkit as tk
@@ -83,6 +84,16 @@ class TestThreadShow:
         )
         for c in thread["comments"]:
             assert c["author"] is not None
+
+        thread = call_action(
+            "comments_thread_show",
+            subject_id=t["subject_id"],
+            subject_type=t["subject_type"],
+            include_comments=True,
+            after_date=(dt.datetime.now()+dt.timedelta(days=1)).isoformat(),
+        )
+
+        assert len(thread["comments"]) == 0
 
 
 class TestThreadDelete:
