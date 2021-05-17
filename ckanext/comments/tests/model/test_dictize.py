@@ -1,4 +1,5 @@
 import pytest
+import datetime as dt
 
 import ckan.tests.factories as factories
 import ckan.model as model
@@ -117,3 +118,50 @@ class TestDictize:
             },
         )["comments"]
         assert len(comments) == 3
+
+    def test_thread_dictize_comments_filter_by_date(self, Comment, Thread):
+        th = Thread()
+        c1 = Comment(thread=th)
+        Comment(thread=th)
+        sysadmin = factories.Sysadmin()
+
+        thread = (
+            model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()
+        )
+
+        comments = thread_dictize(
+            thread,
+            {
+                "model": model,
+                "user": sysadmin["name"],
+                "include_comments": True
+            },
+        )["comments"]
+        assert len(comments) == 2
+
+        comments = thread_dictize(
+            thread,
+            {
+                "model": model,
+                "user": sysadmin["name"],
+                "include_comments": True,
+                "after_date": (dt.datetime.now()+dt.timedelta(days=1)).isoformat()
+            },
+        )["comments"]
+        assert len(comments) == 0
+
+        # Send a comment to the past :)
+        comment = model.Session.query(c_model.Comment).get(c1.get('id'))
+        comment.created_at = (dt.datetime.now()-dt.timedelta(days=3))
+        model.Session.commit()
+
+        comments = thread_dictize(
+            thread,
+            {
+                "model": model,
+                "user": sysadmin["name"],
+                "include_comments": True,
+                "after_date": (dt.datetime.now()-dt.timedelta(days=1)).isoformat()
+            },
+        )["comments"]
+        assert len(comments) == 1

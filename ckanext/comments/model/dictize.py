@@ -46,9 +46,11 @@ def combine_comments(comments: list["CommentDict"]):
 
 def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
     comments_dictized = None
+
     if context.get("include_comments"):
         query = Comment.by_thread(obj.id)
         include_author = tk.asbool(context.get("include_author"))
+        after_date = context.get("after_date")
 
         # let's make it a bit more efficient
         if include_author:
@@ -67,7 +69,12 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
             )
             query = cast(Query, query.filter(approved_filter | own_filter))
 
+        if after_date:
+            date_filer = (Comment.created_at >= after_date)
+            query = cast(Query, query.filter(date_filer))
+
         comments_dictized = []
+
         for comment in query:
             assert isinstance(comment, Comment)
             dictized = comment_dictize(comment, context)
