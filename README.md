@@ -13,29 +13,24 @@ Add comment-trees to CKAN pages
 
 To install ckanext-comments:
 
-1. Activate your CKAN virtual environment, for example:
+1. Install python package
 
-     . /usr/lib/ckan/default/bin/activate
+        pip install ckanext-comments
 
-2. Clone the source and install it on the virtualenv
+1. Add `comments` to the `ckan.plugins` setting in your CKAN
+   config file
 
-    git clone https://github.com/DataShades/ckanext-comments.git
-    cd ckanext-comments
-    pip install -e .
-	pip install -r requirements.txt
+1. Apply database migrations
 
-3. Add `comments` to the `ckan.plugins` setting in your CKAN
-   config file (by default the config file is located at
-   `/etc/ckan/default/ckan.ini`).
+        ckan db upgrade -p comments
 
-4. Apply database migrations
+1. Add `cooments/snippets/thread.html` to your `package/read.html` template, like this:
 
-    ckan db upgrade -p comments
-
-5. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
-
-     sudo service apache2 reload
-
+        {% ckan_extends %}
+        {% block primary_content_inner %}
+            {{ super() }}
+            {% snippet 'comments/snippets/thread.html', subject_id=pkg.id, subject_type='package' %}
+        {% endblock primary_content_inner %}
 
 ## Config settings
 
@@ -63,17 +58,6 @@ To install ckanext-comments:
 	# Number of reply levels that are shown on mobile layout
 	# (optional, default: 3).
     ckanext.comments.mobile_depth_threshold = 3
-
-## Developer installation
-
-To install ckanext-comments for development, activate your CKAN virtualenv and
-do:
-
-    git clone https://github.com/DataShades/ckanext-comments.git
-    cd ckanext-comments
-    python setup.py develop
-    pip install -r dev-requirements.txt
-
 
 ## Tests
 
