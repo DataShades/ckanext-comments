@@ -1,6 +1,12 @@
+from __future__ import annotations
+
 import logging
+from typing import Callable
+from werkzeug.utils import import_string
+
 import ckan.model as model
 import ckan.plugins.toolkit as tk
+
 from ckanext.comments.model import Comment
 import ckanext.comments.const as const
 
@@ -41,8 +47,14 @@ def _can_edit(state: str, by_author: bool = False) -> bool:
     return False
 
 
-def _is_editor(user: model.User) -> bool:
+def is_moderator(user: model.User, comment: Comment) -> bool:
     return user.sysadmin
+
+
+def _is_moderator(user: model.User, comment: Comment) -> bool:
+    checker = tk.config.get(const.CONFIG_MODERATOR_CHECKER, const.DEFAULT_MODERATOR_CHECKER)
+    func: Callable[[model.User, Comment], bool] = import_string(checker, silent=True) or is_moderator
+    return func(user, comment)
 
 
 def auth(func):
@@ -118,6 +130,6 @@ def comment_update(context, data_dict):
         raise tk.ObjectNotFound("Comment not found")
 
     by_author = comment.is_authored_by(context["user"])
-    if by_author or _is_editor(context["auth_user_obj"]):
+    if by_author or _is_moderator(context["auth_user_obj"], comment):
         return {"success": _can_edit(comment.state, by_author)}
     return {"success": False}
