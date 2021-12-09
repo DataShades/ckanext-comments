@@ -11,7 +11,7 @@ CONFIG_APPROVED_EDITS_BY_AUTHOR = "ckanext.comments.approved_edits_by_author"
 CONFIG_MOBILE_THRESHOLD = 'ckanext.comments.mobile_depth_threshold'
 
 DEFAULT_REQUIRE_APPROVAL = True
-DEFAULT_MODERATOR_CHECKER = "ckanext.comments.logic.auth:is_moderator"
+DEFAULT_MODERATOR_CHECKER = "ckanext.comments.utils:comments_is_moderator"
 
 DEFAULT_DRAFT_EDITS = True
 DEFAULT_APPROVED_EDITS = False

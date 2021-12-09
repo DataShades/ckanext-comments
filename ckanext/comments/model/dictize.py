@@ -11,6 +11,7 @@ from ckanext.comments.model import Comment, Thread
 import ckan.lib.dictization as d
 import ckan.lib.dictization.model_dictize as md
 import ckan.plugins.toolkit as tk
+from ..utils import is_moderator
 
 if TYPE_CHECKING:
     from typing import TypedDict
@@ -63,7 +64,7 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
             pass
         elif user is None:
             query = cast(Query, query.filter(approved_filter))
-        elif not user.sysadmin:
+        elif not is_moderator(user, None, obj):
             own_filter = (Comment.author_type == "user") & (
                 Comment.author_id == user.id
             )
