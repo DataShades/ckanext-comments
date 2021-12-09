@@ -5,11 +5,11 @@ comment_id - comment id to remove
 #}
 
 
-<div class="modal fade bd-example-modal-sm" id="confirmation-modal" tabindex="-1" role="dialog" aria-labelledby="confirmation-modal-label" aria-hidden="true">
+<div class="modal fade bd-example-modal-sm" id="confirmation-modal-{{ comment_id }}" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="confirmation-modal-label">{{ _('Confirmation window') }}</h5>
+        <h5 class="modal-title">{{ _('Confirmation window') }}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

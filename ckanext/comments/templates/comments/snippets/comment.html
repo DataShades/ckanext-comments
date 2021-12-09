@@ -44,7 +44,7 @@ comment - dict
             {% endif %}
 
             {% if h.check_access('comments_comment_delete', comment) %}
-                <button type="button" class="btn btn-remove comment-action" data-toggle="modal" data-target="#confirmation-modal">
+                <button type="button" class="btn btn-remove comment-action" data-toggle="modal" data-target="#confirmation-modal-{{ comment.id }}">
                     <i class="fa fa-trash-o"></i>
                     <span class="text">{{ _('Remove') }}</span>
                 </button>
