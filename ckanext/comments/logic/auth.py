@@ -99,23 +99,25 @@ def comment_show(context, data_dict):
 
 @auth
 def comment_approve(context, data_dict):
-    return {"success": False}
+    return comment_update(context, data_dict)
 
 
 @auth
 def comment_delete(context, data_dict):
-    return {"success": False}
+    return comment_update(context, data_dict)
 
 
 @auth
 def comment_update(context, data_dict):
-    id = tk.get_or_bust(data_dict, "id")
+    id = data_dict.get("id")
+    if not id:
+        return {"success": False}
+
     comment = (
         context['session'].query(Comment).filter(Comment.id == id).one_or_none()
     )
-
     if not comment:
-        raise tk.ObjectNotFound("Comment not found")
+        return {"success": False}
 
     by_author = comment.is_authored_by(context["user"])
     if by_author or is_moderator(context["auth_user_obj"], comment, comment.thread):
