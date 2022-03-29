@@ -11,26 +11,26 @@ created = ckanext.signal(u"comments:created")
 """Sent when a new comment created.
 Params:
     sender: Thread ID
-    comment: comment entity
+    comment: comment dictionary
 """
 
 approved = ckanext.signal(u"comments:approved")
 """Sent when an existing comment is approved.
 Params:
     sender: Thread ID
-    comment: comment entity
+    comment: comment dictionary
 """
 
 updated = ckanext.signal(u"comments:updated")
 """Sent after an update of exisning comment.
 Params:
     sender: Thread ID
-    comment: comment entity
+    comment: comment dictionary
 """
 
 deleted = ckanext.signal(u"comments:deleted")
 """Sent when a comment is deleted.
 Params:
     sender: Thread ID
-    comment: comment entity
+    comment: comment dictionary
 """

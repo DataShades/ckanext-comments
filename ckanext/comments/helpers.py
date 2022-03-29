@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import ckan.plugins.toolkit as tk
+import ckan.model as model
 
 import ckanext.comments.const as const
-
+from .model import Comment
 
 _helpers = {}
 
@@ -43,3 +44,23 @@ def mobile_depth_threshold():
             const.CONFIG_MOBILE_THRESHOLD, const.DEFAULT_MOBILE_THRESHOLD
         )
     )
+
+
+@helper
+def author_of(id_: str) -> Optional[model.User]:
+    comment = (
+        model.Session.query(Comment).filter(Comment.id == id_).one_or_none()
+    )
+    if not comment:
+        return None
+    return comment.get_author()
+
+
+@helper
+def subject_of(id_: str) -> Union[model.Package, None]:
+    comment = (
+        model.Session.query(Comment).filter(Comment.id == id_).one_or_none()
+    )
+    if not comment:
+        return None
+    return comment.thread.get_subject()
