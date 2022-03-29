@@ -44,7 +44,6 @@ def _can_edit(state: str, by_author: bool = False) -> bool:
     return False
 
 
-
 def auth(func):
     func.__name__ = f"comments_{func.__name__}"
     _auth[func.__name__] = func
@@ -86,7 +85,10 @@ def reply_create(context, data_dict):
 def comment_show(context, data_dict):
     id = tk.get_or_bust(data_dict, "id")
     comment = (
-        context['session'].query(Comment).filter(Comment.id == id).one_or_none()
+        context["session"]
+        .query(Comment)
+        .filter(Comment.id == id)
+        .one_or_none()
     )
 
     if not comment:
@@ -114,12 +116,17 @@ def comment_update(context, data_dict):
         return {"success": False}
 
     comment = (
-        context['session'].query(Comment).filter(Comment.id == id).one_or_none()
+        context["session"]
+        .query(Comment)
+        .filter(Comment.id == id)
+        .one_or_none()
     )
     if not comment:
         return {"success": False}
 
     by_author = comment.is_authored_by(context["user"])
-    if by_author or is_moderator(context["auth_user_obj"], comment, comment.thread):
+    if by_author or is_moderator(
+        context["auth_user_obj"], comment, comment.thread
+    ):
         return {"success": _can_edit(comment.state, by_author)}
     return {"success": False}

@@ -8,7 +8,7 @@ CONFIG_APPROVED_EDITS = "ckanext.comments.approved_edits"
 CONFIG_DRAFT_EDITS_BY_AUTHOR = "ckanext.comments.draft_edits_by_author"
 CONFIG_APPROVED_EDITS_BY_AUTHOR = "ckanext.comments.approved_edits_by_author"
 
-CONFIG_MOBILE_THRESHOLD = 'ckanext.comments.mobile_depth_threshold'
+CONFIG_MOBILE_THRESHOLD = "ckanext.comments.mobile_depth_threshold"
 
 DEFAULT_REQUIRE_APPROVAL = True
 DEFAULT_MODERATOR_CHECKER = "ckanext.comments.utils:comments_is_moderator"

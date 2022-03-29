@@ -9,6 +9,7 @@ from ckanext.comments.model import Thread, Comment
 from ckanext.comments.model.dictize import get_dictizer
 
 import ckanext.comments.const as const
+from .. import signals
 
 _actions = {}
 
@@ -45,8 +46,8 @@ def thread_create(context, data_dict):
     # make sure we are not messing up with name_or_id
     thread.subject_id = subject.id
 
-    context['session'].add(thread)
-    context['session'].commit()
+    context["session"].add(thread)
+    context["session"].commit()
     thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
 
@@ -66,7 +67,7 @@ def thread_show(context, data_dict):
     context["include_comments"] = data_dict["include_comments"]
     context["combine_comments"] = data_dict["combine_comments"]
     context["include_author"] = data_dict["include_author"]
-    context["after_date"] = data_dict.get('after_date')
+    context["after_date"] = data_dict.get("after_date")
 
     thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
@@ -77,14 +78,15 @@ def thread_show(context, data_dict):
 def thread_delete(context, data_dict):
     tk.check_access("comments_thread_delete", context, data_dict)
     thread = (
-        context['session'].query(Thread)
+        context["session"]
+        .query(Thread)
         .filter(Thread.id == data_dict["id"])
         .one_or_none()
     )
     if thread is None:
         raise tk.ObjectNotFound("Thread not found")
-    context['session'].delete(thread)
-    context['session'].commit()
+    context["session"].delete(thread)
+    context["session"].commit()
     thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
 
@@ -147,9 +149,11 @@ def comment_create(context, data_dict):
         )
     ):
         comment.approve()
-    context['session'].add(comment)
-    context['session'].commit()
+    context["session"].add(comment)
+    context["session"].commit()
     comment_dict = get_dictizer(type(comment))(comment, context)
+
+    signals.created.send(comment.thread_id, comment=comment_dict)
     return comment_dict
 
 
@@ -158,7 +162,8 @@ def comment_create(context, data_dict):
 def comment_show(context, data_dict):
     tk.check_access("comments_comment_show", context, data_dict)
     comment = (
-        context['session'].query(Comment)
+        context["session"]
+        .query(Comment)
         .filter(Comment.id == data_dict["id"])
         .one_or_none()
     )
@@ -173,16 +178,19 @@ def comment_show(context, data_dict):
 def comment_approve(context, data_dict):
     tk.check_access("comments_comment_approve", context, data_dict)
     comment = (
-        context['session'].query(Comment)
+        context["session"]
+        .query(Comment)
         .filter(Comment.id == data_dict["id"])
         .one_or_none()
     )
     if comment is None:
         raise tk.ObjectNotFound("Comment not found")
     comment.approve()
-    context['session'].commit()
+    context["session"].commit()
 
     comment_dict = get_dictizer(type(comment))(comment, context)
+
+    signals.approved.send(comment.thread_id, comment=comment_dict)
     return comment_dict
 
 
@@ -191,15 +199,18 @@ def comment_approve(context, data_dict):
 def comment_delete(context, data_dict):
     tk.check_access("comments_comment_delete", context, data_dict)
     comment = (
-        context['session'].query(Comment)
+        context["session"]
+        .query(Comment)
         .filter(Comment.id == data_dict["id"])
         .one_or_none()
     )
     if comment is None:
         raise tk.ObjectNotFound("Comment not found")
-    context['session'].delete(comment)
-    context['session'].commit()
+    context["session"].delete(comment)
+    context["session"].commit()
     comment_dict = get_dictizer(type(comment))(comment, context)
+
+    signals.deleted.send(comment.thread_id, comment=comment_dict)
     return comment_dict
 
 
@@ -208,15 +219,19 @@ def comment_delete(context, data_dict):
 def comment_update(context, data_dict):
     tk.check_access("comments_comment_update", context, data_dict)
     comment = (
-        context['session'].query(Comment)
+        context["session"]
+        .query(Comment)
         .filter(Comment.id == data_dict["id"])
         .one_or_none()
     )
 
     if comment is None:
         raise tk.ObjectNotFound("Comment not found")
+
     comment.content = data_dict["content"]
     comment.modified_at = datetime.utcnow()
-    context['session'].commit()
+    context["session"].commit()
     comment_dict = get_dictizer(type(comment))(comment, context)
+
+    signals.updated.send(comment.thread_id, comment=comment_dict)
     return comment_dict

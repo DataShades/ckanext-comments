@@ -35,6 +35,11 @@ def thread_for(id_: Optional[str], type_: str) -> dict[str, Any]:
     )
     return thread
 
+
 @helper
 def mobile_depth_threshold():
-    return tk.asint(tk.config.get(const.CONFIG_MOBILE_THRESHOLD, const.DEFAULT_MOBILE_THRESHOLD))
+    return tk.asint(
+        tk.config.get(
+            const.CONFIG_MOBILE_THRESHOLD, const.DEFAULT_MOBILE_THRESHOLD
+        )
+    )

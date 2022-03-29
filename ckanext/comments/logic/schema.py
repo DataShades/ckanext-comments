@@ -56,7 +56,7 @@ def comment_create(
         "author_type": [default("user"), one_of(["user"])],
         "reply_to_id": [
             ignore_missing,
-            tk.get_validator('comments_comment_exists'),
+            tk.get_validator("comments_comment_exists"),
         ],
         "create_thread": [default(False), boolean_validator],
     }

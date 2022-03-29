@@ -15,6 +15,7 @@ from ..utils import is_moderator
 
 if TYPE_CHECKING:
     from typing import TypedDict
+
     class CommentDict(TypedDict):
         id: str
         reply_to_id: str
@@ -39,8 +40,8 @@ def register_dictizer(type_, func):
 def combine_comments(comments: list["CommentDict"]):
     replies: dict[Optional[str], list["CommentDict"]] = {None: []}
     for comment in comments:
-        comment['replies'] = replies.setdefault(comment['id'], [])
-        reply_to = comment['reply_to_id']
+        comment["replies"] = replies.setdefault(comment["id"], [])
+        reply_to = comment["reply_to_id"]
         replies.setdefault(reply_to, []).append(comment)
     return replies[None]
 
@@ -71,7 +72,7 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
             query = cast(Query, query.filter(approved_filter | own_filter))
 
         if after_date:
-            date_filer = (Comment.created_at >= after_date)
+            date_filer = Comment.created_at >= after_date
             query = cast(Query, query.filter(date_filer))
 
         comments_dictized = []
@@ -80,7 +81,7 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
             assert isinstance(comment, Comment)
             dictized = comment_dictize(comment, context)
             comments_dictized.append(dictized)
-        if context.get('combine_comments'):
+        if context.get("combine_comments"):
             comments_dictized = combine_comments(comments_dictized)
     return d.table_dictize(obj, context, comments=comments_dictized)
 

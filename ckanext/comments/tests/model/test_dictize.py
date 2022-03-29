@@ -134,7 +134,7 @@ class TestDictize:
             {
                 "model": model,
                 "user": sysadmin["name"],
-                "include_comments": True
+                "include_comments": True,
             },
         )["comments"]
         assert len(comments) == 2
@@ -145,14 +145,16 @@ class TestDictize:
                 "model": model,
                 "user": sysadmin["name"],
                 "include_comments": True,
-                "after_date": (dt.datetime.now()+dt.timedelta(days=1)).isoformat()
+                "after_date": (
+                    dt.datetime.now() + dt.timedelta(days=1)
+                ).isoformat(),
             },
         )["comments"]
         assert len(comments) == 0
 
         # Send a comment to the past :)
-        comment = model.Session.query(c_model.Comment).get(c1.get('id'))
-        comment.created_at = (dt.datetime.now()-dt.timedelta(days=3))
+        comment = model.Session.query(c_model.Comment).get(c1.get("id"))
+        comment.created_at = dt.datetime.now() - dt.timedelta(days=3)
         model.Session.commit()
 
         comments = thread_dictize(
@@ -161,7 +163,9 @@ class TestDictize:
                 "model": model,
                 "user": sysadmin["name"],
                 "include_comments": True,
-                "after_date": (dt.datetime.now()-dt.timedelta(days=1)).isoformat()
+                "after_date": (
+                    dt.datetime.now() - dt.timedelta(days=1)
+                ).isoformat(),
             },
         )["comments"]
         assert len(comments) == 1
