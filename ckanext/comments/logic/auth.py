@@ -101,7 +101,23 @@ def comment_show(context, data_dict):
 
 @auth
 def comment_approve(context, data_dict):
-    return comment_update(context, data_dict)
+    id = data_dict.get("id")
+    if not id:
+        return {"success": False}
+
+    comment = (
+        context["session"]
+        .query(Comment)
+        .filter(Comment.id == id)
+        .one_or_none()
+    )
+    if not comment:
+        return {"success": False}
+
+    return {"success": is_moderator(
+        context["auth_user_obj"], comment, comment.thread
+    )}
+
 
 
 @auth
