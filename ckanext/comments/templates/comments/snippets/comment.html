@@ -20,30 +20,30 @@
         </div>
         <div class="comment-actions">
             {% if h.check_access('comments_reply_create', {"reply_to_id": comment.id}) %}
-                <button title="{{ _('Reply') }}" class="btn btn-default comment-action reply-to-comment" data-id="{{ comment.id }}">
+                <button aria-label="reply to comment" title="{{ _('Reply') }}" class="btn btn-default comment-action reply-to-comment" data-id="{{ comment.id }}">
                     <i class="fa fa-mail-reply"></i>
                     <span class="text">{{ _('Reply') }}</span>
                 </button>
             {% endif %}
             {% if not comment.approved and h.check_access('comments_comment_approve', comment) %}
-                <button title="{{ _('Approve') }}" class="btn btn-success comment-action approve-comment" data-id="{{ comment.id }}">
+                <button aria-label="approve comment" title="{{ _('Approve') }}" class="btn btn-success comment-action approve-comment" data-id="{{ comment.id }}">
                     <i class="fa fa-check"></i>
                     <span class="text">{{ _('Approve') }}</span>
                 </button>
             {% endif %}
             {% if h.check_access('comments_comment_update', comment) %}
-                <button title="{{ _('Edit') }}" class="btn btn-default comment-action edit-comment" data-id="{{ comment.id }}">
+                <button aria-label="edit comment" title="{{ _('Edit') }}" class="btn btn-default comment-action edit-comment" data-id="{{ comment.id }}">
                     <i class="fa fa-edit"></i>
                     <span class="text">{{ _('Edit') }}</span>
                 </button>
-                <button title="{{ _('Save') }}" class="btn btn-default comment-action save-comment hidden" data-id="{{ comment.id }}">
+                <button aria-label="save comment" title="{{ _('Save') }}" class="btn btn-default comment-action save-comment hidden" data-id="{{ comment.id }}">
                     <i class="fa fa-edit"></i>
                     <span class="text">{{ _('Save') }}</span>
                 </button>
             {% endif %}
 
             {% if h.check_access('comments_comment_delete', comment) %}
-                <button type="button" class="btn btn-remove comment-action" data-toggle="modal" data-target="#confirmation-modal-{{ comment.id }}">
+                <button aria-label="remove comment" type="button" class="btn btn-remove comment-action" data-toggle="modal" data-target="#confirmation-modal-{{ comment.id }}">
                     <i class="fa fa-trash-o"></i>
                     <span class="text">{{ _('Remove') }}</span>
                 </button>
