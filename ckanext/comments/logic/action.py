@@ -27,6 +27,13 @@ def get_actions():
 @action
 @validate(schema.thread_create)
 def thread_create(context, data_dict):
+    """Create a thread for the subject.
+
+    Args:
+        subject_id(str): unique ID of the commented entity
+        subject_type(str:package|resource|user|group): type of the commented entity
+
+    """
     tk.check_access("comments_thread_create", context, data_dict)
     thread = Thread.for_subject(
         data_dict["subject_type"], data_dict["subject_id"], init_missing=True
@@ -55,6 +62,17 @@ def thread_create(context, data_dict):
 @action
 @validate(schema.thread_show)
 def thread_show(context, data_dict):
+    """Show the subject's thread.
+
+    Args:
+        subject_id(str): unique ID of the commented entity
+        subject_type(str:package|resource|user|group): type of the commented entity
+        init_missing(bool, optional): return an empty thread instead of 404
+        include_comments(bool, optional): show comments from the thread
+        include_author(bool, optional): show authors of the comments
+        combine_comments(bool, optional): combine comments into a tree-structure
+        after_date(str:ISO date, optional): show comments only since the given date
+    """
     tk.check_access("comments_thread_show", context, data_dict)
     thread = Thread.for_subject(
         data_dict["subject_type"],
@@ -76,6 +94,11 @@ def thread_show(context, data_dict):
 @action
 @validate(schema.thread_delete)
 def thread_delete(context, data_dict):
+    """Delete the thread.
+
+    Args:
+        id(str): ID of the thread
+    """
     tk.check_access("comments_thread_delete", context, data_dict)
     thread = (
         context["session"]
@@ -94,6 +117,15 @@ def thread_delete(context, data_dict):
 @action
 @validate(schema.comment_create)
 def comment_create(context, data_dict):
+    """Add a comment to the thread.
+
+    Args:
+        subject_id(str): unique ID of the commented entity
+        subject_type(str:package|resource|user|group): type of the commented entity
+        content(str): comment's message
+        reply_to_id(str, optional): reply to the existing comment
+        create_thread(bool, optional): create a new thread if it doesn't exist yet
+    """
     tk.check_access("comments_comment_create", context, data_dict)
 
     thread_data = {
@@ -160,6 +192,11 @@ def comment_create(context, data_dict):
 @action
 @validate(schema.comment_show)
 def comment_show(context, data_dict):
+    """Show the details of the comment
+
+    Args:
+        id(str): ID of the comment
+    """
     tk.check_access("comments_comment_show", context, data_dict)
     comment = (
         context["session"]
@@ -176,6 +213,11 @@ def comment_show(context, data_dict):
 @action
 @validate(schema.comment_approve)
 def comment_approve(context, data_dict):
+    """Approve draft comment
+
+    Args:
+        id(str): ID of the comment
+    """
     tk.check_access("comments_comment_approve", context, data_dict)
     comment = (
         context["session"]
@@ -197,6 +239,11 @@ def comment_approve(context, data_dict):
 @action
 @validate(schema.comment_delete)
 def comment_delete(context, data_dict):
+    """Remove existing comment
+
+    Args:
+        id(str): ID of the comment
+    """
     tk.check_access("comments_comment_delete", context, data_dict)
     comment = (
         context["session"]
@@ -217,6 +264,13 @@ def comment_delete(context, data_dict):
 @action
 @validate(schema.comment_update)
 def comment_update(context, data_dict):
+    """Update existing comment
+
+    Args:
+        id(str): ID of the comment
+        content(str): comment's message
+    """
+
     tk.check_access("comments_comment_update", context, data_dict)
     comment = (
         context["session"]
