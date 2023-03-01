@@ -54,6 +54,7 @@ class TestAuth:
             "comments_comment_show", user_ctx.copy(), id=comment["id"]
         )
 
+    @pytest.mark.ckan_config(const.CONFIG_DRAFT_EDITS_BY_AUTHOR, False)
     def test_comment_update(self, Comment, monkeypatch, ckan_config):
         user = factories.User()
         user_ctx = {"model": model, "user": user["name"]}

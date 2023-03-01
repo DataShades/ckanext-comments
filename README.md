@@ -21,6 +21,9 @@ Jinja2 template in order to show the comments on a page.
 {% snippet 'comments/snippets/thread.html', subject_id=pkg.id, subject_type='package' %}
 ```
 
+:info: For the datasets it also can be achieved by enabling
+`ckanext.comments.enable_default_dataset_comments` option.
+
 ## Requirements
 
 * python >= 3.7
@@ -79,6 +82,10 @@ ckanext.comments.approved_edits_by_author = false
 # Number of reply levels that are shown on mobile layout
 # (optional, default: 3).
 ckanext.comments.mobile_depth_threshold = 3
+
+# Include default thread implementation on the dataset page
+# (optional, default: false).
+ckanext.comments.enable_default_dataset_comments = true
 ```
 
 ## API

@@ -18,3 +18,6 @@ DEFAULT_MOBILE_THRESHOLD = 3
 
 CONFIG_MODERATOR_CHECKER = "ckanext.comments.moderator_checker"
 DEFAULT_MODERATOR_CHECKER = "ckanext.comments.utils:comments_is_moderator"
+
+CONFIG_ENABLE_DATASET = "ckanext.comments.enable_default_dataset_comments"
+DEFAULT_ENABLE_DATASET = False

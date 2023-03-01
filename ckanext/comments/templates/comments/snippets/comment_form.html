@@ -1,17 +1,18 @@
 {#
-#}
+  #}
 
 {% import 'macros/form.html' as form %}
 
 <form class="form comment-form">
-    <fieldset>
-        <legend>{{ _('Leave a comment') }}</legend>
-        {{ form.textarea('content', id='comment-content', label=_('Content')) }}
-    </fieldset>
+  {{ h.csrf_input() }}
+  <fieldset>
+    <legend>{{ _('Leave a comment') }}</legend>
+    {{ form.textarea('content', id='comment-content', label=_('Content')) }}
+  </fieldset>
 
-    <div class="form-group control-full">
-        <button type="submit" class="btn btn-primary">
-            {{ _('Save') }}
-        </button>
-    </div>
+  <div class="form-group control-full">
+    <button type="submit" class="btn btn-primary">
+      {{ _('Save') }}
+    </button>
+  </div>
 </form>
