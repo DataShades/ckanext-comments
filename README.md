@@ -1,4 +1,4 @@
-[![Tests](https://github.com/DataShades/ckanext-comments/workflows/Tests/badge.svg?branch=main)](https://github.com/DataShades/ckanext-comments/actions)
+[![Tests](https://github.com/DataShades/ckanext-comments/actions/workflows/test.yml/badge.svg)](https://github.com/DataShades/ckanext-comments/actions/workflows/test.yml)
 
 # ckanext-comments
 
@@ -155,7 +155,7 @@ Args:
 
 To run the tests, do:
 ```sh
-pytest --ckan-ini=test.ini
+pytest
 ```
 
 

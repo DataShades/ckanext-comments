@@ -6,7 +6,12 @@ import ckanext.comments.logic.auth as auth
 import ckanext.comments.logic.validators as validators
 import ckanext.comments.helpers as helpers
 
+try:
+    config_declarations = tk.blanket.config_declarations
+except AttributeError:
+    config_declarations = lambda cls: cls
 
+@config_declarations
 class CommentsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IAuthFunctions)

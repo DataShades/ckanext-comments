@@ -1,0 +1,5 @@
+version: 1
+groups:
+  - annotation: ckanext-comments
+    options:
+      - key: ckanext.comments.example_option

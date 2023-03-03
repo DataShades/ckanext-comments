@@ -127,6 +127,7 @@ def comment_delete(context, data_dict):
 
 @auth
 def comment_update(context, data_dict):
+
     id = data_dict.get("id")
     if not id:
         return {"success": False}
