@@ -1,21 +1,19 @@
 from __future__ import annotations
 
 import logging
-
 from datetime import datetime
 from typing import Callable, Optional, Union
 
-from sqlalchemy import Column, DateTime, Text, ForeignKey
-from sqlalchemy.orm import relationship, foreign, Query
+from sqlalchemy import Column, DateTime, ForeignKey, Text
+from sqlalchemy.orm import Query, foreign, relationship
 
 import ckan.model as model
-
 from ckan.model.types import make_uuid
 
-from .base import Base
-from . import Thread
 from ckanext.comments.exceptions import UnsupportedAuthorType
 
+from . import Thread
+from .base import Base
 
 log = logging.getLogger(__name__)
 
@@ -42,13 +40,9 @@ class Comment(Base):
 
     state: str = Column(Text, nullable=False, default=State.draft)
 
-    reply_to_id: Optional[str] = Column(
-        Text, ForeignKey(id), nullable=True, index=True
-    )
+    reply_to_id: Optional[str] = Column(Text, ForeignKey(id), nullable=True, index=True)
 
-    created_at: datetime = Column(
-        DateTime, nullable=False, default=datetime.utcnow
-    )
+    created_at: datetime = Column(DateTime, nullable=False, default=datetime.utcnow)
     modified_at: Optional[datetime] = Column(DateTime, nullable=True)
 
     thread: Thread = relationship(Thread, single_parent=True)
@@ -56,14 +50,11 @@ class Comment(Base):
     user: Optional[model.User] = relationship(
         model.User,
         backref="comments",
-        primaryjoin=(author_type == "user")
-        & (model.User.id == foreign(author_id)),
+        primaryjoin=(author_type == "user") & (model.User.id == foreign(author_id)),
         single_parent=True,
     )
 
-    reply_to: Optional[Comment] = relationship(
-        "Comment", primaryjoin=id == reply_to_id
-    )
+    reply_to: Optional[Comment] = relationship("Comment", primaryjoin=id == reply_to_id)
 
     def __repr__(self):
         return (

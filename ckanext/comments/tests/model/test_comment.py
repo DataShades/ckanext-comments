@@ -1,8 +1,8 @@
-from ckan.tests.helpers import call_action
 import pytest
 
 import ckan.model as model
 import ckan.tests.factories as factories
+from ckan.tests.helpers import call_action
 
 import ckanext.comments.model as c_model
 from ckanext.comments.exceptions import UnsupportedAuthorType
@@ -21,11 +21,7 @@ class TestComment:
         author = factories.User()
         not_author = factories.User()
         comment = Comment(author_type="user", author_id=author["id"])
-        c = (
-            model.Session.query(c_model.Comment)
-            .filter_by(id=comment["id"])
-            .one()
-        )
+        c = model.Session.query(c_model.Comment).filter_by(id=comment["id"]).one()
         assert c.is_authored_by(author["id"])
         assert c.is_authored_by(author["name"])
         assert not c.is_authored_by(not_author["id"])

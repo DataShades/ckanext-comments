@@ -11,9 +11,7 @@ from ckanext.comments.exceptions import UnsupportedSubjectType
 class TestThread:
     def test_comments(self, Thread, Comment):
         th = Thread()
-        thread = (
-            model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()
-        )
+        thread = model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()
         assert thread.comments().count() == 0
 
         Comment(thread=th)
@@ -42,9 +40,7 @@ class TestThread:
         dataset = factories.Dataset()
         assert c_model.Thread.for_subject("package", dataset["id"]) is None
 
-        th = c_model.Thread.for_subject(
-            "package", dataset["id"], init_missing=True
-        )
+        th = c_model.Thread.for_subject("package", dataset["id"], init_missing=True)
         assert th.id is None
         assert th.subject_type == "package"
         assert th.subject_id == dataset["id"]

@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-import ckan.plugins.toolkit as tk
 import ckan.model as model
+import ckan.plugins.toolkit as tk
 
 from ckanext.comments.model.thread import Subject
-from .model import Comment
+
 from . import config
+from .model import Comment
 
 _helpers = {}
 
@@ -15,11 +16,10 @@ _helpers = {}
 def get_helpers():
     helpers = _helpers.copy()
 
-    if 'csrf_input' not in tk.h:
-        helpers['csrf_input'] = lambda: ""
+    if "csrf_input" not in tk.h:
+        helpers["csrf_input"] = lambda: ""
 
     return helpers
-
 
 
 def helper(func):
@@ -51,9 +51,7 @@ def mobile_depth_threshold() -> int:
 
 @helper
 def author_of(id_: str) -> Optional[model.User]:
-    comment = (
-        model.Session.query(Comment).filter(Comment.id == id_).one_or_none()
-    )
+    comment = model.Session.query(Comment).filter(Comment.id == id_).one_or_none()
     if not comment:
         return None
     return comment.get_author()
@@ -61,9 +59,7 @@ def author_of(id_: str) -> Optional[model.User]:
 
 @helper
 def subject_of(id_: str) -> Optional[Subject]:
-    comment = (
-        model.Session.query(Comment).filter(Comment.id == id_).one_or_none()
-    )
+    comment = model.Session.query(Comment).filter(Comment.id == id_).one_or_none()
     if not comment:
         return None
     return comment.thread.get_subject()

@@ -1,5 +1,5 @@
-from ckan.logic.schema import validator_args
 import ckan.plugins.toolkit as tk
+from ckan.logic.schema import validator_args
 
 
 @validator_args
@@ -36,9 +36,7 @@ def thread_delete(not_empty):
 
 
 @validator_args
-def comment_create(
-    not_empty, one_of, default, boolean_validator, ignore_missing
-):
+def comment_create(not_empty, one_of, default, boolean_validator, ignore_missing):
     return {
         "subject_id": [
             not_empty,

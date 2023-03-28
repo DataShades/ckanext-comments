@@ -7,28 +7,28 @@ except AttributeError:
 
     ckanext = Namespace()
 
-created = ckanext.signal(u"comments:created")
+created = ckanext.signal("comments:created")
 """Sent when a new comment created.
 Params:
     sender: Thread ID
     comment: comment dictionary
 """
 
-approved = ckanext.signal(u"comments:approved")
+approved = ckanext.signal("comments:approved")
 """Sent when an existing comment is approved.
 Params:
     sender: Thread ID
     comment: comment dictionary
 """
 
-updated = ckanext.signal(u"comments:updated")
+updated = ckanext.signal("comments:updated")
 """Sent after an update of exisning comment.
 Params:
     sender: Thread ID
     comment: comment dictionary
 """
 
-deleted = ckanext.signal(u"comments:deleted")
+deleted = ckanext.signal("comments:deleted")
 """Sent when a comment is deleted.
 Params:
     sender: Thread ID

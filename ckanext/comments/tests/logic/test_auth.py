@@ -3,7 +3,8 @@ import pytest
 import ckan.model as model
 import ckan.plugins.toolkit as tk
 import ckan.tests.factories as factories
-from ckan.tests.helpers import call_auth, call_action
+from ckan.tests.helpers import call_action, call_auth
+
 from ckanext.comments import config
 
 
@@ -39,20 +40,12 @@ class TestAuth:
         user_ctx = {"model": model, "user": user["name"]}
         comment = Comment(user=user)
         with pytest.raises(tk.NotAuthorized):
-            call_auth(
-                "comments_comment_show", anon_ctx.copy(), id=comment["id"]
-            )
-        assert call_auth(
-            "comments_comment_show", user_ctx.copy(), id=comment["id"]
-        )
+            call_auth("comments_comment_show", anon_ctx.copy(), id=comment["id"])
+        assert call_auth("comments_comment_show", user_ctx.copy(), id=comment["id"])
 
         call_action("comments_comment_approve", id=comment["id"])
-        assert call_auth(
-            "comments_comment_show", anon_ctx.copy(), id=comment["id"]
-        )
-        assert call_auth(
-            "comments_comment_show", user_ctx.copy(), id=comment["id"]
-        )
+        assert call_auth("comments_comment_show", anon_ctx.copy(), id=comment["id"])
+        assert call_auth("comments_comment_show", user_ctx.copy(), id=comment["id"])
 
     @pytest.mark.ckan_config(config.CONFIG_DRAFT_EDITS_BY_AUTHOR, False)
     def test_comment_update(self, Comment, monkeypatch, ckan_config):
@@ -66,9 +59,7 @@ class TestAuth:
                 "comments_comment_update", user_ctx.copy(), id=comment["id"]
             )
 
-        monkeypatch.setitem(
-            ckan_config, config.CONFIG_DRAFT_EDITS_BY_AUTHOR, True
-        )
+        monkeypatch.setitem(ckan_config, config.CONFIG_DRAFT_EDITS_BY_AUTHOR, True)
 
         with pytest.raises(tk.NotAuthorized):
             call_auth(
@@ -76,9 +67,7 @@ class TestAuth:
                 another_user_ctx.copy(),
                 id=comment["id"],
             )
-        assert call_auth(
-            "comments_comment_update", user_ctx.copy(), id=comment["id"]
-        )
+        assert call_auth("comments_comment_update", user_ctx.copy(), id=comment["id"])
 
         call_action("comments_comment_approve", id=comment["id"])
 
@@ -95,9 +84,7 @@ class TestAuth:
                 id=comment["id"],
             )
 
-        monkeypatch.setitem(
-            ckan_config, config.CONFIG_APPROVED_EDITS_BY_AUTHOR, True
-        )
+        monkeypatch.setitem(ckan_config, config.CONFIG_APPROVED_EDITS_BY_AUTHOR, True)
         with pytest.raises(tk.NotAuthorized):
             call_auth(
                 "comments_comment_update",
@@ -105,6 +92,4 @@ class TestAuth:
                 id=comment["id"],
             )
 
-        assert call_auth(
-            "comments_comment_update", user_ctx.copy(), id=comment["id"]
-        )
+        assert call_auth("comments_comment_update", user_ctx.copy(), id=comment["id"])

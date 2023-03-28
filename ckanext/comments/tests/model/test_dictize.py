@@ -1,13 +1,13 @@
-import pytest
 import datetime as dt
 
-import ckan.tests.factories as factories
-import ckan.model as model
+import pytest
 
+import ckan.model as model
+import ckan.tests.factories as factories
 from ckan.tests.helpers import call_action
 
 import ckanext.comments.model as c_model
-from ckanext.comments.model.dictize import thread_dictize, comment_dictize
+from ckanext.comments.model.dictize import comment_dictize, thread_dictize
 
 
 @pytest.mark.usefixtures("clean_db")
@@ -17,11 +17,7 @@ class TestDictize:
         comment = Comment(thread=thread)
         call_action("comments_comment_approve", id=comment["id"])
 
-        th = (
-            model.Session.query(c_model.Thread)
-            .filter_by(id=thread["id"])
-            .one()
-        )
+        th = model.Session.query(c_model.Thread).filter_by(id=thread["id"]).one()
         dictized = thread_dictize(th, {"model": model, "user": ""})
         assert thread == dictized
 
@@ -36,11 +32,7 @@ class TestDictize:
     def test_comment_dictize(self, Comment):
         author = factories.User()
         comment = Comment(author_type="user", author_id=author["id"])
-        c = (
-            model.Session.query(c_model.Comment)
-            .filter_by(id=comment["id"])
-            .one()
-        )
+        c = model.Session.query(c_model.Comment).filter_by(id=comment["id"]).one()
 
         assert comment_dictize(c, {"model": model}) == comment
 
@@ -60,9 +52,7 @@ class TestDictize:
         c2 = Comment(thread=th, user=user)
         c3 = Comment(thread=th)
         call_action("comments_comment_approve", id=c1["id"])
-        thread = (
-            model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()
-        )
+        thread = model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()
         comments = thread_dictize(
             thread, {"model": model, "user": "", "include_comments": True}
         )["comments"]
@@ -125,9 +115,7 @@ class TestDictize:
         Comment(thread=th)
         sysadmin = factories.Sysadmin()
 
-        thread = (
-            model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()
-        )
+        thread = model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()
 
         comments = thread_dictize(
             thread,
@@ -145,9 +133,7 @@ class TestDictize:
                 "model": model,
                 "user": sysadmin["name"],
                 "include_comments": True,
-                "after_date": (
-                    dt.datetime.now() + dt.timedelta(days=1)
-                ).isoformat(),
+                "after_date": (dt.datetime.now() + dt.timedelta(days=1)).isoformat(),
             },
         )["comments"]
         assert len(comments) == 0
@@ -163,9 +149,7 @@ class TestDictize:
                 "model": model,
                 "user": sysadmin["name"],
                 "include_comments": True,
-                "after_date": (
-                    dt.datetime.now() - dt.timedelta(days=1)
-                ).isoformat(),
+                "after_date": (dt.datetime.now() - dt.timedelta(days=1)).isoformat(),
             },
         )["comments"]
         assert len(comments) == 1

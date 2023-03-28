@@ -1,10 +1,10 @@
 import factory
 from factory.fuzzy import FuzzyText
 
-import ckanext.comments.model as model
-
-import ckan.tests.helpers as helpers
 import ckan.tests.factories as factories
+import ckan.tests.helpers as helpers
+
+import ckanext.comments.model as model
 
 
 class Thread(factory.Factory):

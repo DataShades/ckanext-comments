@@ -1,15 +1,16 @@
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as tk
 
+import ckanext.comments.helpers as helpers
 import ckanext.comments.logic.action as action
 import ckanext.comments.logic.auth as auth
 import ckanext.comments.logic.validators as validators
-import ckanext.comments.helpers as helpers
 
 try:
     config_declarations = tk.blanket.config_declarations
 except AttributeError:
     config_declarations = lambda cls: cls
+
 
 @config_declarations
 class CommentsPlugin(plugins.SingletonPlugin):

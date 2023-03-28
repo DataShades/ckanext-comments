@@ -1,19 +1,18 @@
 from __future__ import annotations
 
 import logging
-
 from datetime import datetime
-from typing import Callable, Optional, TYPE_CHECKING, Union, cast
+from typing import TYPE_CHECKING, Callable, Optional, Union, cast
 
 from sqlalchemy import Column, DateTime, Text
 from sqlalchemy.orm import Query
 
 import ckan.model as model
-
 from ckan.model.types import make_uuid
 
-from .base import Base
 from ckanext.comments.exceptions import UnsupportedSubjectType
+
+from .base import Base
 
 if TYPE_CHECKING:
     from .comment import Comment
@@ -37,17 +36,10 @@ class Thread(Base):
     subject_id: str = Column(Text, nullable=False)
     subject_type: str = Column(Text, nullable=False)
 
-    created_at: datetime = Column(
-        DateTime, nullable=False, default=datetime.utcnow
-    )
+    created_at: datetime = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return (
-            "Thread("
-            f"id={self.id!r}, "
-            f"subject_type={self.subject_type!r}, "
-            ")"
-        )
+        return "Thread(" f"id={self.id!r}, " f"subject_type={self.subject_type!r}, " ")"
 
     def comments(self) -> Query:
         from .comment import Comment

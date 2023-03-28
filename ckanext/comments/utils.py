@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-
 import ckan.model as model
+
 from . import config
+
 
 def comments_is_moderator(user: model.User, comment, thread) -> bool:
     return user.sysadmin

@@ -1,5 +1,6 @@
-import pytest
 import datetime as dt
+
+import pytest
 
 import ckan.model as model
 import ckan.plugins.toolkit as tk
@@ -262,9 +263,7 @@ class TestCommentDelete:
 class TestCommentUpdate:
     def test_missing_comment(self, Comment):
         with pytest.raises(tk.ObjectNotFound):
-            call_action(
-                "comments_comment_update", id="not-exist", content="content"
-            )
+            call_action("comments_comment_update", id="not-exist", content="content")
 
     @pytest.mark.usefixtures("clean_db")
     def test_comment_update(self, Comment):

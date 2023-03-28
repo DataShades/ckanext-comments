@@ -5,10 +5,10 @@ import ckan.plugins.toolkit as tk
 from ckan.logic import validate
 
 import ckanext.comments.logic.schema as schema
-from ckanext.comments.model import Thread, Comment
+from ckanext.comments.model import Comment, Thread
 from ckanext.comments.model.dictize import get_dictizer
 
-from .. import signals, config
+from .. import config, signals
 
 _actions = {}
 
@@ -40,11 +40,7 @@ def thread_create(context, data_dict):
 
     if thread.id:
         raise tk.ValidationError(
-            {
-                "id": [
-                    "Thread for the given subject_id and subject_type already exists"
-                ]
-            }
+            {"id": ["Thread for the given subject_id and subject_type already exists"]}
         )
     subject = thread.get_subject()
     if subject is None:
@@ -132,9 +128,7 @@ def comment_create(context, data_dict):
         "subject_type": data_dict["subject_type"],
     }
     try:
-        thread_dict = tk.get_action("comments_thread_show")(
-            context.copy(), thread_data
-        )
+        thread_dict = tk.get_action("comments_thread_show")(context.copy(), thread_data)
     except tk.ObjectNotFound:
         if not data_dict["create_thread"]:
             raise
@@ -143,9 +137,7 @@ def comment_create(context, data_dict):
         )
 
     author_id = data_dict.get("author_id")
-    can_set_author_id = (
-        context.get("ignore_auth") or context["auth_user_obj"].sysadmin
-    )
+    can_set_author_id = context.get("ignore_auth") or context["auth_user_obj"].sysadmin
 
     if not author_id or not can_set_author_id:
         author_id = context["user"]

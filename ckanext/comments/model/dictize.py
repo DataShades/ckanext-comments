@@ -2,15 +2,17 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from typing import Any, Callable, Optional, TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 
 from sqlalchemy.orm import Query, joinedload
 
-import ckan.model as model
-from ckanext.comments.model import Comment, Thread
 import ckan.lib.dictization as d
 import ckan.lib.dictization.model_dictize as md
+import ckan.model as model
 import ckan.plugins.toolkit as tk
+
+from ckanext.comments.model import Comment, Thread
+
 from ..utils import is_moderator
 
 if TYPE_CHECKING:
@@ -86,17 +88,13 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
     return d.table_dictize(obj, context, comments=comments_dictized)
 
 
-def comment_dictize(
-    obj: Comment, context: Any, **extra: Any
-) -> dict[str, Any]:
+def comment_dictize(obj: Comment, context: Any, **extra: Any) -> dict[str, Any]:
     extra["approved"] = obj.is_approved()
 
     if context.get("include_author"):
         author = obj.get_author()
         if author:
-            extra["author"] = get_dictizer(type(author))(
-                author, context.copy()
-            )
+            extra["author"] = get_dictizer(type(author))(author, context.copy())
         else:
             log.error("Missing author for comment: %s", obj)
             extra["author"] = None
