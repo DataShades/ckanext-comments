@@ -5,9 +5,9 @@ from typing import Any, Optional
 import ckan.plugins.toolkit as tk
 import ckan.model as model
 
-import ckanext.comments.const as const
 from ckanext.comments.model.thread import Subject
 from .model import Comment
+from . import config
 
 _helpers = {}
 
@@ -45,12 +45,8 @@ def thread_for(id_: Optional[str], type_: str) -> dict[str, Any]:
 
 
 @helper
-def mobile_depth_threshold():
-    return tk.asint(
-        tk.config.get(
-            const.CONFIG_MOBILE_THRESHOLD, const.DEFAULT_MOBILE_THRESHOLD
-        )
-    )
+def mobile_depth_threshold() -> int:
+    return config.mobile_depth_threshold()
 
 
 @helper
@@ -75,4 +71,4 @@ def subject_of(id_: str) -> Optional[Subject]:
 
 @helper
 def enable_default_dataset_comments() -> bool:
-    return tk.asbool(tk.config.get(const.CONFIG_ENABLE_DATASET, const.DEFAULT_ENABLE_DATASET))
+    return config.use_default_dataset_comments()

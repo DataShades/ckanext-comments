@@ -8,8 +8,7 @@ import ckanext.comments.logic.schema as schema
 from ckanext.comments.model import Thread, Comment
 from ckanext.comments.model.dictize import get_dictizer
 
-import ckanext.comments.const as const
-from .. import signals
+from .. import signals, config
 
 _actions = {}
 
@@ -175,11 +174,7 @@ def comment_create(context, data_dict):
     # make sure we are not messing up with name_or_id
     comment.author_id = author.id
 
-    if not tk.asbool(
-        tk.config.get(
-            const.CONFIG_REQUIRE_APPROVAL, const.DEFAULT_REQUIRE_APPROVAL
-        )
-    ):
+    if not config.approval_required():
         comment.approve()
     context["session"].add(comment)
     context["session"].commit()

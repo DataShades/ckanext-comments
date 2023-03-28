@@ -4,8 +4,8 @@ import logging
 import ckan.plugins.toolkit as tk
 
 from ckanext.comments.model import Comment
-import ckanext.comments.const as const
 from ..utils import is_moderator
+from .. import config
 
 log = logging.getLogger(__name__)
 _auth = {}
@@ -14,32 +14,13 @@ _auth = {}
 def _can_edit(state: str, by_author: bool = False) -> bool:
     if state == Comment.State.draft:
         if by_author:
-            return tk.asbool(
-                tk.config.get(
-                    const.CONFIG_DRAFT_EDITS_BY_AUTHOR,
-                    const.DEFAULT_DRAFT_EDITS_BY_AUTHOR,
-                )
-            )
-        return tk.asbool(
-            tk.config.get(
-                const.CONFIG_DRAFT_EDITS,
-                const.DEFAULT_DRAFT_EDITS,
-            )
-        )
+            return config.allow_draft_edits_by_author()
+        return config.allow_draft_edits()
     elif state == Comment.State.approved:
         if by_author:
-            return tk.asbool(
-                tk.config.get(
-                    const.CONFIG_APPROVED_EDITS_BY_AUTHOR,
-                    const.DEFAULT_APPROVED_EDITS_BY_AUTHOR,
-                )
-            )
-        return tk.asbool(
-            tk.config.get(
-                const.CONFIG_APPROVED_EDITS,
-                const.DEFAULT_APPROVED_EDITS,
-            )
-        )
+            return config.allow_approved_edits_by_author()
+        return config.allow_approved_edits()
+
     log.warning("Unexpected comment state: %s", state)
     return False
 

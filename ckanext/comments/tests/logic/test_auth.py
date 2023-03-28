@@ -4,7 +4,7 @@ import ckan.model as model
 import ckan.plugins.toolkit as tk
 import ckan.tests.factories as factories
 from ckan.tests.helpers import call_auth, call_action
-import ckanext.comments.const as const
+from ckanext.comments import config
 
 
 @pytest.mark.usefixtures("clean_db")
@@ -54,7 +54,7 @@ class TestAuth:
             "comments_comment_show", user_ctx.copy(), id=comment["id"]
         )
 
-    @pytest.mark.ckan_config(const.CONFIG_DRAFT_EDITS_BY_AUTHOR, False)
+    @pytest.mark.ckan_config(config.CONFIG_DRAFT_EDITS_BY_AUTHOR, False)
     def test_comment_update(self, Comment, monkeypatch, ckan_config):
         user = factories.User()
         user_ctx = {"model": model, "user": user["name"]}
@@ -67,7 +67,7 @@ class TestAuth:
             )
 
         monkeypatch.setitem(
-            ckan_config, const.CONFIG_DRAFT_EDITS_BY_AUTHOR, True
+            ckan_config, config.CONFIG_DRAFT_EDITS_BY_AUTHOR, True
         )
 
         with pytest.raises(tk.NotAuthorized):
@@ -96,7 +96,7 @@ class TestAuth:
             )
 
         monkeypatch.setitem(
-            ckan_config, const.CONFIG_APPROVED_EDITS_BY_AUTHOR, True
+            ckan_config, config.CONFIG_APPROVED_EDITS_BY_AUTHOR, True
         )
         with pytest.raises(tk.NotAuthorized):
             call_auth(

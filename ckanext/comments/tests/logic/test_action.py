@@ -6,7 +6,7 @@ import ckan.plugins.toolkit as tk
 import ckan.tests.factories as factories
 from ckan.tests.helpers import call_action
 
-import ckanext.comments.const as const
+from ckanext.comments import config
 
 
 @pytest.mark.usefixtures("clean_db")
@@ -215,7 +215,7 @@ class TestCommentCreate:
         assert len(top["replies"]) == 1
         assert top["replies"][0]["id"] == reply["id"]
 
-    @pytest.mark.ckan_config(const.CONFIG_REQUIRE_APPROVAL, False)
+    @pytest.mark.ckan_config(config.CONFIG_REQUIRE_APPROVAL, False)
     @pytest.mark.usefixtures("clean_db")
     def test_optional_approval(self, Comment):
         comment = Comment()
