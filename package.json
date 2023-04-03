@@ -1,6 +1,6 @@
 {
   "name": "ckanext-comments",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "[![Tests](https://github.com/DataShades/ckanext-comments/workflows/Tests/badge.svg?branch=main)](https://github.com/DataShades/ckanext-comments/actions)",
   "main": "index.js",
   "scripts": {
