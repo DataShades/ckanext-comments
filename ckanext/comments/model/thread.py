@@ -3,11 +3,13 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from typing import TYPE_CHECKING, Callable, Optional, Union, cast
+from werkzeug.utils import import_string
 
 from sqlalchemy import Column, DateTime, Text
 from sqlalchemy.orm import Query
 
 import ckan.model as model
+import ckan.plugins.toolkit as tk
 from ckan.model.types import make_uuid
 
 from ckanext.comments.exceptions import UnsupportedSubjectType
@@ -47,12 +49,18 @@ class Thread(Base):
         return Comment.by_thread(self.id)
 
     def get_subject(self) -> Optional[Subject]:
-        try:
+        getter = import_string(
+            tk.config.get(f"ckanext.comments.subject.{self.subject_type}_getter"),
+            True,
+        )
+
+        if not getter and self.subject_type in self._subject_getters:
             getter = self._subject_getters[self.subject_type]
-        except KeyError:
-            log.error("Unknown subject type: %s", self.subject_type)
+
+        if not getter:
             raise UnsupportedSubjectType(self.subject_type)
-        return getter(self.subject_id)
+
+        return getter(self.subject_id)  # type: ignore
 
     @classmethod
     def for_subject(

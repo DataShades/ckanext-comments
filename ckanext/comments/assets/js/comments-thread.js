@@ -5,6 +5,7 @@ ckan.module("comments-thread", function ($) {
     options: {
       subjectId: null,
       subjectType: null,
+      ajaxReload: null,
     },
     initialize: function () {
       $.proxyAll(this, /_on/);
@@ -23,7 +24,7 @@ ckan.module("comments-thread", function ($) {
       this.$(".comment-actions .edit-comment").on("click", this._onEditComment);
       this.$(".comment-actions .save-comment").on("click", this._onSaveComment);
       this.$(".comment-footer").on("click", this._onFooterClick);
-      this.$(".comment-form").on("submit", this._onSubmit);
+      this.$(".comment-form").off("submit").on("submit", this._onSubmit);
     },
     teardown: function () {
       this.$(".comment-action.remove-comment").off(
@@ -35,7 +36,7 @@ ckan.module("comments-thread", function ($) {
         this._onApproveComment
       );
 
-      this.$("comment-form").off("sumbit", this._onSubmit);
+      this.$(".comment-form").off("submit", this._onSubmit);
     },
     _onFooterClick: function (e) {
       if (e.target.classList.contains("cancel-reply")) {
@@ -52,6 +53,7 @@ ckan.module("comments-thread", function ($) {
     },
     _onRemoveComment: function (e) {
       var id = e.currentTarget.dataset.id;
+      var ajaxReload = this.options.ajaxReload;
 
       this.sandbox.client.call(
         "POST",
@@ -59,13 +61,21 @@ ckan.module("comments-thread", function ($) {
         {
           id: id,
         },
-        function () {
-          window.location.reload();
+        function (e) {
+            if (ajaxReload) {
+                $(".modal").modal("hide");
+
+                $(document).trigger("comments:changed");
+            } else {
+                window.location.reload();
+            }
         }
       );
     },
     _onApproveComment: function (e) {
       var id = e.currentTarget.dataset.id;
+      var ajaxReload = this.options.ajaxReload;
+
       this.sandbox.client.call(
         "POST",
         "comments_comment_approve",
@@ -73,11 +83,14 @@ ckan.module("comments-thread", function ($) {
           id: id,
         },
         function () {
-          window.location.reload();
+            if (ajaxReload) {
+                $(document).trigger("comments:changed");
+            } else {
+                window.location.reload();
+            }
         }
       );
     },
-
     _disableActiveReply: function () {
       $(".comment .reply-textarea-wrapper").remove();
     },
@@ -140,6 +153,8 @@ ckan.module("comments-thread", function ($) {
       var notify = this.sandbox.notify;
       var _ = this.sandbox.translate;
       var content = target.closest(".comment").find(".comment-body textarea");
+      var ajaxReload = this.options.ajaxReload;
+
       this.sandbox.client.call(
         "POST",
         "comments_comment_update",
@@ -148,7 +163,11 @@ ckan.module("comments-thread", function ($) {
           content: content.val(),
         },
         function () {
-          window.location.reload();
+            if (ajaxReload) {
+                $(document).trigger("comments:changed");
+            } else {
+                window.location.reload();
+            }
         },
         function (err) {
           console.log(err);
@@ -170,14 +189,24 @@ ckan.module("comments-thread", function ($) {
       this._saveComment({ content: data.get("content"), create_thread: true });
     },
     _saveComment: function (data) {
+      if (!data.content) {
+        return;
+      }
+
       data.subject_id = this.options.subjectId;
       data.subject_type = this.options.subjectType;
+      var ajaxReload = this.options.ajaxReload;
+
       this.sandbox.client.call(
         "POST",
         "comments_comment_create",
         data,
         function () {
-          window.location.reload();
+            if (ajaxReload) {
+                $(document).trigger("comments:changed");
+            } else {
+                window.location.reload();
+            }
         }
       );
     },

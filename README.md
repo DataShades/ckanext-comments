@@ -86,7 +86,14 @@ ckanext.comments.mobile_depth_threshold = 3
 # Include default thread implementation on the dataset page
 # (optional, default: false).
 ckanext.comments.enable_default_dataset_comments = true
+
+# Register custom getter for a subject by providing a path to a function
+# ckanext.comments.subject.{self.subject_type}_getter = path
+# The function must accept an ID and return a model object
+ckanext.comments.subject.question_getter = ckanext.msf_ask_question.model.question_getter
 ```
+
+
 
 ## API
 

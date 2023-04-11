@@ -3,14 +3,14 @@ from ckan.logic.schema import validator_args
 
 
 @validator_args
-def thread_create(not_empty, one_of):
+def thread_create(not_empty, unicode_safe):
     return {
         "subject_id": [
             not_empty,
         ],
         "subject_type": [
             not_empty,
-            one_of(["package", "resource", "user", "group"]),
+            unicode_safe,
         ],
     }
 
@@ -36,14 +36,14 @@ def thread_delete(not_empty):
 
 
 @validator_args
-def comment_create(not_empty, one_of, default, boolean_validator, ignore_missing):
+def comment_create(not_empty, unicode_safe, one_of, default, boolean_validator, ignore_missing):
     return {
         "subject_id": [
             not_empty,
         ],
         "subject_type": [
             not_empty,
-            one_of(["package", "resource", "user", "group"]),
+            unicode_safe,
         ],
         "content": [
             not_empty,
