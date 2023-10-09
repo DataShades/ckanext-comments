@@ -53,6 +53,9 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
 
     if context.get("include_comments"):
         query = Comment.by_thread(obj.id)
+        if context.get("newest_first"):
+            query = query.order_by(None).order_by(Comment.created_at.desc())
+
         include_author = tk.asbool(context.get("include_author"))
         after_date = context.get("after_date")
 

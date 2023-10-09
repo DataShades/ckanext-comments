@@ -82,6 +82,8 @@ def thread_show(context, data_dict):
     context["include_author"] = data_dict["include_author"]
     context["after_date"] = data_dict.get("after_date")
 
+    context["newest_first"] = data_dict["newest_first"]
+
     thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
 

@@ -20,6 +20,7 @@ def thread_show(default, boolean_validator, ignore_missing, isodate):
     schema = thread_create()
     schema.update(
         {
+            "newest_first": [default(False), boolean_validator],
             "init_missing": [default(False), boolean_validator],
             "include_comments": [default(False), boolean_validator],
             "include_author": [default(False), boolean_validator],
