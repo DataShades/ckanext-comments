@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Callable, Optional, Union
 
 from sqlalchemy import Column, DateTime, ForeignKey, Text
-from sqlalchemy.orm import Query, foreign, relationship
+from sqlalchemy.orm import Query, backref, foreign, relationship
 
 import ckan.model as model
 from ckan.model.types import make_uuid
@@ -54,7 +54,11 @@ class Comment(Base):
         single_parent=True,
     )
 
-    reply_to: Optional[Comment] = relationship("Comment", primaryjoin=id == reply_to_id)
+    reply_to: Optional[Comment] = relationship(
+        "Comment",
+        primaryjoin=id == reply_to_id,
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return (

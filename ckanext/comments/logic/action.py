@@ -105,6 +105,7 @@ def thread_delete(context, data_dict):
     )
     if thread is None:
         raise tk.ObjectNotFound("Thread not found")
+
     context["session"].delete(thread)
     context["session"].commit()
     thread_dict = get_dictizer(type(thread))(thread, context)
@@ -242,6 +243,7 @@ def comment_delete(context, data_dict):
     )
     if comment is None:
         raise tk.ObjectNotFound("Comment not found")
+
     context["session"].delete(comment)
     context["session"].commit()
     comment_dict = get_dictizer(type(comment))(comment, context)
