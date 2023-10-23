@@ -5,6 +5,8 @@ from datetime import datetime
 from typing import Callable, Optional, Union
 
 from sqlalchemy import Column, DateTime, ForeignKey, Text
+from sqlalchemy.dialects.postgresql import JSONB
+
 from sqlalchemy.orm import Query, backref, foreign, relationship
 
 import ckan.model as model
@@ -17,7 +19,7 @@ from .base import Base
 
 log = logging.getLogger(__name__)
 
-Author = Union[model.User]
+Author = model.User
 AuthorGetter = Callable[[str], Optional[Author]]
 
 
@@ -44,6 +46,8 @@ class Comment(Base):
 
     created_at: datetime = Column(DateTime, nullable=False, default=datetime.utcnow)
     modified_at: Optional[datetime] = Column(DateTime, nullable=True)
+
+    extras = Column(JSONB, nullable=False, default=dict)
 
     thread: Thread = relationship(Thread, single_parent=True)
 

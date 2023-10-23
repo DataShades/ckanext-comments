@@ -49,10 +49,8 @@ class Thread(Base):
         return Comment.by_thread(self.id)
 
     def get_subject(self) -> Optional[Subject]:
-        getter = import_string(
-            tk.config.get(f"ckanext.comments.subject.{self.subject_type}_getter"),
-            True,
-        )
+        option = tk.config.get(f"ckanext.comments.subject.{self.subject_type}_getter")
+        getter = import_string(option, True) if option else None
 
         if not getter and self.subject_type in self._subject_getters:
             getter = self._subject_getters[self.subject_type]
@@ -60,7 +58,7 @@ class Thread(Base):
         if not getter:
             raise UnsupportedSubjectType(self.subject_type)
 
-        return getter(self.subject_id)  # type: ignore
+        return getter(self.subject_id)
 
     @classmethod
     def for_subject(

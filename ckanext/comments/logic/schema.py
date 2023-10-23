@@ -37,7 +37,16 @@ def thread_delete(not_empty):
 
 
 @validator_args
-def comment_create(not_empty, unicode_safe, one_of, default, boolean_validator, ignore_missing):
+def comment_create(
+    not_empty,
+    unicode_safe,
+    one_of,
+    default,
+    boolean_validator,
+    ignore_missing,
+    convert_to_json_if_string,
+    dict_only,
+):
     return {
         "subject_id": [
             not_empty,
@@ -58,6 +67,7 @@ def comment_create(not_empty, unicode_safe, one_of, default, boolean_validator, 
             tk.get_validator("comments_comment_exists"),
         ],
         "create_thread": [default(False), boolean_validator],
+        "extras": [default("{}"), convert_to_json_if_string, dict_only],
     }
 
 
