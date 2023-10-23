@@ -1,3 +1,4 @@
+
 from datetime import datetime
 
 import ckan.lib.dictization as d
@@ -160,6 +161,7 @@ def comment_create(context, data_dict):
         thread_id=thread_dict["id"],
         content=data_dict["content"],
         author_type=data_dict["author_type"],
+        extras=data_dict["extras"],
         author_id=author_id,
         reply_to_id=reply_to_id,
     )
