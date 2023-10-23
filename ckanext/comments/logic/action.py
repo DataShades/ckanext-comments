@@ -34,6 +34,7 @@ def thread_create(context, data_dict):
 
     """
     tk.check_access("comments_thread_create", context, data_dict)
+
     thread = Thread.for_subject(
         data_dict["subject_type"], data_dict["subject_id"], init_missing=True
     )

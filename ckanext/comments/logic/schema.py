@@ -7,6 +7,7 @@ def thread_create(not_empty, unicode_safe):
     return {
         "subject_id": [
             not_empty,
+            unicode_safe,
         ],
         "subject_type": [
             not_empty,
@@ -48,9 +49,7 @@ def comment_create(
     dict_only,
 ):
     return {
-        "subject_id": [
-            not_empty,
-        ],
+        "subject_id": [not_empty, unicode_safe],
         "subject_type": [
             not_empty,
             unicode_safe,
