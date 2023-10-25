@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## Unreleased
+
+<small>[Compare with latest](https://github.com/DataShades/ckanext-comments/compare/v0.3.0...HEAD)</small>
+
+### Features
+
+- Comment.extras column ([bacf606](https://github.com/DataShades/ckanext-comments/commit/bacf606b3c2a1a2c806231daeea4eb863a3136c9) by Sergey Motornyuk).
+- newest_first argument for thread_show ([6e05486](https://github.com/DataShades/ckanext-comments/commit/6e054868a2e05473afa5db5c8ea468ce28776849) by Sergey Motornyuk).
+
+### Bug Fixes
+
+- subject_id fails on non-str values ([7d467ec](https://github.com/DataShades/ckanext-comments/commit/7d467ec81cf2ae9d323ebdf4303e8152d393dfba) by Sergey Motornyuk).
+- add DB level cascade drop to comments ([e68e55c](https://github.com/DataShades/ckanext-comments/commit/e68e55c6280d78a4b0940edc78b989f4899be97c) by Sergey Motornyuk).
+
+<!-- insertion marker -->
 ## [v0.3.0](https://github.com/DataShades/ckanext-comments/releases/tag/v0.3.0) - 2023-04-11
 
 <small>[Compare with v0.1.2](https://github.com/DataShades/ckanext-comments/compare/v0.1.2...v0.3.0)</small>
