@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 
-from sqlalchemy.orm import Query, joinedload
+from sqlalchemy.orm import joinedload
 
 import ckan.lib.dictization as d
 import ckan.lib.dictization.model_dictize as md
@@ -31,11 +31,11 @@ _dictizers: dict[type, Callable[..., dict[str, Any]]] = defaultdict(
 log = logging.getLogger(__name__)
 
 
-def get_dictizer(type_):
+def get_dictizer(type_: type):
     return _dictizers[type_]
 
 
-def register_dictizer(type_, func):
+def register_dictizer(type_: type, func: Any):
     _dictizers[type_] = func
 
 
@@ -52,7 +52,7 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
     comments_dictized = None
 
     if context.get("include_comments"):
-        query = Comment.by_thread(obj.id)
+        query = Comment.by_thread(cast(str, obj.id))
         if context.get("newest_first"):
             query = query.order_by(None).order_by(Comment.created_at.desc())
 
@@ -61,7 +61,7 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
 
         # let's make it a bit more efficient
         if include_author:
-            query = cast(Query, query.options(joinedload(Comment.user)))
+            query = query.options(joinedload(Comment.user))
 
         approved_filter = Comment.state == Comment.State.approved
         user = model.User.get(context["user"])
@@ -69,16 +69,16 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
         if context.get("ignore_auth"):
             pass
         elif user is None:
-            query = cast(Query, query.filter(approved_filter))
+            query = query.filter(approved_filter)
         elif not is_moderator(user, None, obj):
             own_filter = (Comment.author_type == "user") & (
                 Comment.author_id == user.id
             )
-            query = cast(Query, query.filter(approved_filter | own_filter))
+            query = query.filter(approved_filter | own_filter)  # type: ignore
 
         if after_date:
             date_filer = Comment.created_at >= after_date
-            query = cast(Query, query.filter(date_filer))
+            query = query.filter(date_filer)
 
         comments_dictized = []
 

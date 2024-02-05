@@ -1,4 +1,3 @@
-
 from datetime import datetime
 
 import ckan.lib.dictization as d
@@ -44,11 +43,8 @@ def thread_create(context, data_dict):
         raise tk.ValidationError(
             {"id": ["Thread for the given subject_id and subject_type already exists"]}
         )
-    subject = thread.get_subject()
-    if subject is None:
+    if thread.get_subject() is None:
         raise tk.ObjectNotFound("Cannot find subject for thread")
-    # make sure we are not messing up with name_or_id
-    thread.subject_id = subject.id
 
     context["session"].add(thread)
     context["session"].commit()
