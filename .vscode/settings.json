@@ -1,0 +1,11 @@
+{
+  "prettier.disableLanguages": ["html"],
+  "prettier.enable": false,
+  "prettier.htmlWhitespaceSensitivity": "strict",
+  
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#ff004c"
+  }
+}
+
+

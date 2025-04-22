@@ -8,8 +8,12 @@ import ckanext.comments.logic.schema as schema
 from ckanext.comments.model import Comment, Thread
 from ckanext.comments.model.dictize import get_dictizer
 
+import ckanext.comments.utils as utils
+from ckan import authz
+
 from .. import config, signals
 
+_ = tk._
 _actions = {}
 
 
@@ -54,6 +58,7 @@ def thread_create(context, data_dict):
 
 @action
 @validate(schema.thread_show)
+@tk.side_effect_free
 def thread_show(context, data_dict):
     """Show the subject's thread.
 
@@ -81,6 +86,7 @@ def thread_show(context, data_dict):
     context["after_date"] = data_dict.get("after_date")
 
     context["newest_first"] = data_dict["newest_first"]
+    context["pinned_first"] = data_dict["pinned_first"]
 
     thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict
@@ -160,11 +166,12 @@ def comment_create(context, data_dict):
         extras=data_dict["extras"],
         author_id=author_id,
         reply_to_id=reply_to_id,
+        anonymous= data_dict.get('anonymous')
     )
 
     author = comment.get_author()
     if author is None:
-        raise tk.ObjectNotFound("Cannot find author for comment")
+        raise tk.ObjectNotFound(_("Cannot find author for comment"))
     # make sure we are not messing up with name_or_id
     comment.author_id = author.id
 
@@ -180,6 +187,7 @@ def comment_create(context, data_dict):
 
 @action
 @validate(schema.comment_show)
+@tk.side_effect_free
 def comment_show(context, data_dict):
     """Show the details of the comment
 
@@ -194,7 +202,9 @@ def comment_show(context, data_dict):
         .one_or_none()
     )
     if comment is None:
-        raise tk.ObjectNotFound("Comment not found")
+        raise tk.ObjectNotFound(_("Comment not found"))
+    
+    context["include_author"] = True
     comment_dict = get_dictizer(type(comment))(comment, context)
     return comment_dict
 
@@ -202,12 +212,18 @@ def comment_show(context, data_dict):
 @action
 @validate(schema.comment_approve)
 def comment_approve(context, data_dict):
-    """Approve draft comment
-
-    Args:
-        id(str): ID of the comment
-    """
     tk.check_access("comments_comment_approve", context, data_dict)
+    return patch_comment(context, data_dict, {'state': Comment.State.approved})
+
+@action
+@validate(schema.comment_approve)
+def comment_reject(context, data_dict):
+    tk.check_access("comments_comment_approve", context, data_dict)
+    return patch_comment(context, data_dict, {'state': Comment.State.rejected})
+    
+
+def patch_comment(context, data_dict, updated_dict):
+
     comment = (
         context["session"]
         .query(Comment)
@@ -215,14 +231,45 @@ def comment_approve(context, data_dict):
         .one_or_none()
     )
     if comment is None:
-        raise tk.ObjectNotFound("Comment not found")
-    comment.approve()
+        raise tk.ObjectNotFound(_("Comment not found"))
+    
+    comment.patch_comment(**updated_dict)
+    
     context["session"].commit()
 
     comment_dict = get_dictizer(type(comment))(comment, context)
 
     signals.approved.send(comment.thread_id, comment=comment_dict)
     return comment_dict
+
+
+@action
+@validate(schema.comment_approve)
+def comment_hide(context, data_dict):
+    tk.check_access("comments_comment_approve", context, data_dict)
+    return patch_comment(context, data_dict, {'hidden': True})
+
+
+@action
+@validate(schema.comment_approve)
+def comment_unhide(context, data_dict):
+    tk.check_access("comments_comment_approve", context, data_dict)
+    return patch_comment(context, data_dict, {'hidden': False})
+
+
+@action
+@validate(schema.comment_approve)
+def comment_pin(context, data_dict):
+    tk.check_access("comments_comment_approve", context, data_dict)
+    return patch_comment(context, data_dict, {'pinned': True})
+
+
+@action
+@validate(schema.comment_approve)
+def comment_unpin(context, data_dict):
+    tk.check_access("comments_comment_approve", context, data_dict)
+    return patch_comment(context, data_dict, {'pinned': False})
+
 
 
 @action
@@ -241,7 +288,7 @@ def comment_delete(context, data_dict):
         .one_or_none()
     )
     if comment is None:
-        raise tk.ObjectNotFound("Comment not found")
+        raise tk.ObjectNotFound(_("Comment not found"))
 
     context["session"].delete(comment)
     context["session"].commit()
@@ -270,12 +317,83 @@ def comment_update(context, data_dict):
     )
 
     if comment is None:
-        raise tk.ObjectNotFound("Comment not found")
+        raise tk.ObjectNotFound(_("Comment not found"))
 
-    comment.content = data_dict["content"]
-    comment.modified_at = datetime.utcnow()
+    comment.patch_comment(**{
+        'content': data_dict["content"],
+        'state': Comment.State.draft,
+        'hidden': comment.hidden or False,
+        'pinned': comment.pinned or False,
+        'modified_at': datetime.utcnow(),
+    })
+
     context["session"].commit()
     comment_dict = get_dictizer(type(comment))(comment, context)
 
     signals.updated.send(comment.thread_id, comment=comment_dict)
     return comment_dict
+
+
+@action
+@tk.side_effect_free
+@validate(schema.comments_search_schema)
+def comment_search(context, data_dict):
+    tk.check_access("comments_comment_list", context, data_dict)
+    
+    model = context["model"]
+    user = context.get('user')
+    user_obj = model.User.get(user)
+
+
+    offset = data_dict.pop('page', 1) - 1
+    limit = data_dict.pop('limit', 20)
+
+
+    if not (authz.is_authorized_boolean('is_portal_admin', context) \
+            or authz.is_authorized_boolean('is_content_editor', context)):
+        data_dict['author_id'] = user_obj.id
+
+    query = Comment.advance_filter(**data_dict)
+    search_count = query.count()
+
+
+    if limit > -1:
+        query = query.offset(offset * limit).limit(limit)    
+    context["include_author"] = True
+
+    return {
+        'total': search_count,
+        'items': [
+            get_dictizer(type(comment))(comment, context)
+            for comment in query.all()
+        ]
+    }
+
+
+@action
+@validate(schema.generate_statics_schema)
+@tk.side_effect_free
+def generate_statistics(context, data_dict):
+    tk.check_access("comments_comment_list", context, data_dict)
+    
+    model = context["model"]
+    user = context.get('user')
+    user_obj = model.User.get(user)
+    
+    user_org = utils.get_organization_id_for_user(context)
+
+    if authz.is_authorized_boolean('is_portal_admin', context)\
+                or authz.is_authorized_boolean('is_content_editor', context):
+        return Comment.generate_statistics(
+            organization_id=data_dict.get('organization_id', None)
+        )
+    elif user_org:
+        return Comment.generate_statistics(
+            organization_id=user_org
+        )
+    else:
+        return Comment.generate_statistics(
+            organization_id=data_dict.get('organization_id', None),
+            author_id=user_obj.id
+        )
+

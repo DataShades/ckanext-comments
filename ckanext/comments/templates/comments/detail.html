@@ -1,0 +1,41 @@
+{% extends "page.html" %}
+
+{% set comments_list_route = 'comments.index' %}
+{% set comments_read_route = 'comments.show' %}
+{% set comments_status_update_route = 'comments.status_update' %}
+
+
+{% block subtitle %}{{ _('Comments') }}{% endblock %}
+
+{% block breadcrumb_content %}
+    <li>{% link_for _('Comments'), named_route=comments_list_route %}</li>
+  {% if comment %}
+    {% set showcase = comment.content %}
+    <li>{% link_for showcase|truncate(30), named_route=comments_read_route, id=comment.id %}</li>
+  {% endif %}
+{% endblock %}
+
+{% block content_action %}
+  {% if h.check_access('comments_comment_approve', {'id': comment.id}) %}
+    {% link_for _('Manage'), named_route=comments_status_update_route, id=comment.id, class_='btn btn-default', icon='wrench' %}
+  {% endif %}
+{% endblock %}
+
+{% block content_primary_nav %}
+  {{ h.build_nav_icon(comments_read_route, _('Comment Details'), id=comment.id, icon='info-circle') }}
+{% endblock %}
+
+
+{% block primary_content_inner %}
+  <h1>{{_('Comment')}}</h1>
+  {% if comment.content %}
+      {{ h.render_markdown(comment.content) }}
+    {% endif %}
+
+    {% snippet 'package/snippets/metadata.html', extras = h.comments_comment_metatdata(comment), table_title = _('Comment info') %}
+{% endblock %}
+
+
+{% block secondary_content %}
+  {% snippet "comments/snippets/user_info.html", user_info = comment.user_info, submitted_date=comment.created_at %}
+{% endblock %}

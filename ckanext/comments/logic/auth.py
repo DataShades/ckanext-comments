@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 
 import ckan.plugins.toolkit as tk
+from ckan import authz
 
 from ckanext.comments.model import Comment
 
@@ -71,7 +72,11 @@ def comment_show(context, data_dict):
 
     if not comment:
         raise tk.ObjectNotFound("Comment not found")
-    return {"success": comment.is_approved() or comment.is_authored_by(context["user"])}
+    return {
+        "success": comment.is_approved() \
+            or comment.is_authored_by(context["user"]) \
+            or  is_moderator(context["auth_user_obj"], comment, comment.thread)
+            }
 
 
 @auth
@@ -107,3 +112,10 @@ def comment_update(context, data_dict):
     if by_author or is_moderator(context["auth_user_obj"], comment, comment.thread):
         return {"success": _can_edit(comment.state, by_author)}
     return {"success": False}
+
+
+@auth
+def comment_list(context, data_dict):
+    return {
+        'success': not authz.auth_not_logged_in(context)
+    }

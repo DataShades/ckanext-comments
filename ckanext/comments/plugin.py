@@ -5,6 +5,8 @@ import ckanext.comments.helpers as helpers
 import ckanext.comments.logic.action as action
 import ckanext.comments.logic.auth as auth
 import ckanext.comments.logic.validators as validators
+from ckanext.comments.views import blueprint
+from ckan.lib.plugins import DefaultTranslation
 
 try:
     config_declarations = tk.blanket.config_declarations
@@ -13,12 +15,14 @@ except AttributeError:
 
 
 @config_declarations
-class CommentsPlugin(plugins.SingletonPlugin):
+class CommentsPlugin(plugins.SingletonPlugin, DefaultTranslation):
+    plugins.implements(plugins.ITranslation, inherit=True)
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IAuthFunctions)
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IValidators)
+    plugins.implements(plugins.IBlueprint)
 
     # IConfigurer
 
@@ -46,3 +50,9 @@ class CommentsPlugin(plugins.SingletonPlugin):
 
     def get_validators(self):
         return validators.get_validators()
+
+
+    # IBlueprint
+
+    def get_blueprint(self):
+        return [blueprint]

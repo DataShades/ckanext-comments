@@ -1,0 +1,63 @@
+{% extends 'page.html' %}
+
+
+{% set comments_list_route = 'comments.index' %}
+{% set comments_read_route = 'comments.show' %}
+{% set comments_status_update_route = 'comments.status_update' %}
+
+
+
+{% block subtitle %}{{ _('Comments') }}{% endblock %}
+
+
+{% block breadcrumb_content_selected %}{% endblock %}
+
+{% block breadcrumb_content %}
+  {% if comment %}
+    {% set comment_title = comment.content %}
+    <li>{% link_for _('Comments'), named_route=comments_list_route %}</li>
+    <li{{ self.breadcrumb_content_selected() }}>{% link_for comment_title|truncate(30), named_route=comments_read_route, id=comment.id %}</li>
+    <li class="active">{% link_for _('Edit'), named_route=showcase_edit_route, id=comment.id %}</li>
+  {% else %}
+    <li>{% link_for _('Comments'), named_route=comments_list_route %}</li>
+    <li class="active"><a href="">{{ _('Update Status') }}</a></li>
+  {% endif %}
+{% endblock %}
+
+{% block primary %}
+  <div class="{% block ckanext_showcase_edit_span %}span12{% endblock %}">
+    {% block primary_content %}
+      <article class="module">
+        {% block page_header %}
+          <header class="module-content page-header">
+            {% if self.content_action() | trim %}
+              <div class="content_action">
+                {% block content_action %}
+                  {% link_for _('View Comment'), named_route=comments_read_route, id=comment.id, class_='btn', icon='eye-open' %}
+                {% endblock %}
+              </div>
+            {% endif %}
+            <ul class="nav nav-tabs">
+              {% block content_primary_nav %}
+                {{ h.build_nav_icon(comments_status_update_route, _('Update Status'), id=comment.id) }}
+              {% endblock %}
+            </ul>
+          </header>
+        {% endblock %}
+        <div class="{% block ckanext_showcase_edit_module_content_class %}module-content{% endblock %}">
+          {% if self.page_primary_action() | trim %}
+            <div class="page_primary_action">
+              {% block page_primary_action %}{% endblock %}
+            </div>
+          {% endif %}
+          {% block primary_content_inner %}
+          {% endblock %}
+        </div>
+      </article>
+    {% endblock %}
+  </div>
+{% endblock %}
+
+{% block secondary %}
+
+{% endblock %}

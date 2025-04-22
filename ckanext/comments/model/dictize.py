@@ -4,6 +4,7 @@ import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 
+from sqlalchemy import and_
 from sqlalchemy.orm import joinedload
 
 import ckan.lib.dictization as d
@@ -53,9 +54,20 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
 
     if context.get("include_comments"):
         query = Comment.by_thread(cast(str, obj.id))
-        if context.get("newest_first"):
-            query = query.order_by(None).order_by(Comment.created_at.desc())
 
+        # Handle sorting based on pinned_first and newest_first
+        order_clauses = []
+        if context.get("pinned_first"):
+            order_clauses.append(Comment.pinned.desc())
+        if context.get("newest_first"):
+            order_clauses.append(Comment.created_at.desc())
+        else:
+            order_clauses.append(Comment.created_at.asc())
+
+        # Apply the order_by clauses if there are any
+        if order_clauses:
+            query = query.order_by(None).order_by(*order_clauses)
+        
         include_author = tk.asbool(context.get("include_author"))
         after_date = context.get("after_date")
 
@@ -63,7 +75,10 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
         if include_author:
             query = query.options(joinedload(Comment.user))
 
-        approved_filter = Comment.state == Comment.State.approved
+        approved_filter = and_(
+            Comment.state.in_([Comment.State.approved]),
+            Comment.hidden != True
+        )
         user = model.User.get(context["user"])
 
         if context.get("ignore_auth"):
@@ -94,10 +109,29 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
 def comment_dictize(obj: Comment, context: Any, **extra: Any) -> dict[str, Any]:
     extra["approved"] = obj.is_approved()
 
+    
+    subject = obj.thread.get_subject()
+    extra['package'] = {
+        'id': subject.id,
+        'name': subject.name,
+        'display_name': subject.title,
+        'organization': {'id': subject.owner_org}
+    }
+    try:
+        pkg_dict = tk.get_action('package_show')(
+            {**context, 'ignore_auth': True},
+            {'id': subject.id}
+        )
+        extra['package']['display_name'] = pkg_dict.get('display_name')
+        extra['package']['organization'] = pkg_dict.get('organization')
+    except:
+        pass
+    
     if context.get("include_author"):
         author = obj.get_author()
         if author:
             extra["author"] = get_dictizer(type(author))(author, context.copy())
+            extra["user_info"] = tk.get_action('user_management_show')({**context, 'ignore_auth':True}, {'id':author.id})
         else:
             log.error("Missing author for comment: %s", obj)
             extra["author"] = None

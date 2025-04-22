@@ -1,0 +1,82 @@
+{% set lang = h.lang() %}
+{% set comments_list_route = 'comments.index' %}
+{% set comment_status_update_route = 'comments.status_update' %}
+{% set STATUS_DICT = h.comments_status_dict() %}
+
+{% set bool_dict = {
+  False : _('No'),
+  'False' : _('No'),
+  'false' : _('No'),
+  false : _('No'),
+  True : _('Yes'),
+  'True' : _('Yes'),
+  'true' : _('Yes'),
+  true : _('Yes'),
+} %}
+
+<tr>
+  <th scope="row"><strong>{{h.render_datetime(comment.created_at, date_format='%d/%m/%Y')}}</strong></th>
+  <td>
+    <a href="{{ h.url_for('dataset.read', id=comment.package.id) }}">{{ comment.package.display_name }}</a>
+  </td>
+  <td>
+    {% if h.check_access('end_user_dashboard_view_auth', {'id': comment.author.name} ) %}
+      <a href="{{ h.url_for('ogddashboard.end_user', id=comment.author.name) }}">
+        {{comment.author.fullname or comment.author.name}}
+      </a>
+    {% else %}
+    {{comment.author.fullname or comment.author.name}}
+    {% endif %}
+  </td>
+
+  <td>{{ _(bool_dict[comment.anonymous or False]) }}</td>
+
+  <td style="width: 35%; max-width: 40%;">{{ comment.content|truncate(80) }}</td>
+  <td> {{ STATUS_DICT[comment.state] }}</td>
+  <td>
+    {% if h.check_access('comments_comment_approve', {'id': comment.id}) %}
+      {% if comment.state != 'rejected' %}
+      <div class="d-flex flex-row comment-actions" style="gap:2px;"> 
+        {% if not comment.approved %}
+        <span style="cursor: pointer;" class="comment-action approve-comment" data-id="{{ comment.id }}">
+          <img src="/images/approved.png">  
+        </span>
+
+        <span style="cursor: pointer;" class="comment-action reject-comment" data-id="{{ comment.id }}">
+          <img src="/images/reject.png"> 
+        </span>
+        {% endif %}
+
+        {% if comment.approved %}
+          {% if comment.hidden %}
+          <span title="{{ _('unhide comment') }}" style="cursor: pointer;" class="comment-action unhide-comment" data-id="{{ comment.id }}">
+            <img src="/images/view_icon.png"> 
+          </span>
+          {% else %}
+          <span title="{{ _('hide comment') }}" style="cursor: pointer;" class="comment-action hide-comment" data-id="{{ comment.id }}">
+            <img src="/images/hide_icon.png"> 
+          </span>
+          {% endif %}
+
+          {% if comment.pinned %}
+          <span title="{{ _('unpin comment') }}" style="cursor: pointer;" class="comment-action unpin-comment" data-id="{{ comment.id }}">
+            <img src="/images/unpin_icon.png"> 
+          </span>
+          {% else %}
+          <span title="{{ _('pin comment') }}" style="cursor: pointer;" class="comment-action pin-comment" data-id="{{ comment.id }}">
+            <img src="/images/pin_icon.png"> 
+          </span>
+          {% endif %}
+        {% endif %}
+      </div>
+      {% endif %}
+    {% else %}
+      <p>{{ _('No Actions Available') }}</p>
+    {% endif %}
+  </td>
+  <td>
+    <a href="{{ h.url_for(comment_status_update_route, id=comment.id) }}">
+      {{_('More Details')}} 
+    </a>
+  </td>
+</tr>

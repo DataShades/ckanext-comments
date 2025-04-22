@@ -1,0 +1,59 @@
+{% extends "package/search_full_width.html" %}
+{% import 'macros/form.html' as form %}
+
+{% set comments_list_route = 'comments.index' %}
+
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href="/css/container2.css">
+{% endblock %}
+
+
+{% block subtitle %}{{ _("Comments") }}{% endblock %}
+
+{% block breadcrumb_content %}
+  <li class="active">{{ h.nav_link(_('Comments'), named_route=comments_list_route) }}</li>
+{% endblock %}
+
+{% block page_primary_action %}
+  <h2>{{ _('Comments on datasets') }}</h2>
+  {% snippet 'comments/snippets/stats-indicators.html', statistics=comments_statistics %}
+{% endblock %}
+
+{% block form %}
+  {% set sorting = [
+    (_('Last Created'), 'created_at desc'),
+    (_('Comment Ascending'), 'content asc'),
+    (_('Comment Descending'), 'content desc'),
+    ]
+  %}
+  {% 
+    snippet 'comments/snippets/comments_search_form.html', 
+    placeholder=_('Search comments...'), 
+    query=data_dict.q, 
+    entity_selected=data_dict.organization_id or '', 
+    entity_options=h.comments_entity_options(), 
+    status_options=h.comments_status_options(), 
+    status_selected= data_dict.state,
+    after_date=data_dict.after_date,
+    sorting=sorting, 
+    sorting_selected=selected_sorting, 
+    count=count, 
+    show_empty=request.args, 
+    error=data_dict.errors, 
+    no_bottom_border=true 
+  %}
+{% endblock %}
+
+{% block package_search_results_list %}
+  {{ h.snippet('comments/snippets/list.html', comments=comments) }}
+{% endblock %}
+
+
+{% block package_search_results_api %}
+{% endblock %}
+
+
+{% block secondary_content %}
+  {% snippet "comments/snippets/helper.html", group_type=group_type %}
+{% endblock %}

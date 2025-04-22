@@ -1,0 +1,24 @@
+{% extends "snippets/search_form.html" %}
+
+{% block search_title %}
+{% if not no_title %}
+  <h2>{% snippet 'comments/snippets/comments_search_result_text.html', query=query, count=count %}</h2>
+{% endif %}
+{% endblock %}
+
+{% block search_sortby %}
+{% set after_date_formatted =  after_date.strftime('%Y-%m-%d') if after_date else '' %}
+
+{% snippet 
+  'comments/snippets/advanced_filtering.html', 
+    entity_selected=entity_selected, 
+    entity_options=entity_options, 
+    status_options=status_options, 
+    status_selected= status_selected,
+    after_date=after_date,
+    sorting=sorting, 
+    sorting_selected=selected_sorting  
+  %}
+
+
+{% endblock %}

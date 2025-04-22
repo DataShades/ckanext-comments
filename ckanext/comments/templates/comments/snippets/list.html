@@ -1,0 +1,44 @@
+{% block comments_list %}
+{% if comments %}
+{% asset 'comments/comments-thread' %}
+<div class="tablebody table-responsive mt-3 mb-3" data-module="comments-thread">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col" style="font-weight: bold !important;">{{_('Date')}}</th>
+          <th scope="col" style="font-weight: bold !important;">{{_('Dataset')}}</th>
+          <th scope="col" style="font-weight: bold !important;">{{_('User')}}</th>
+          <th scope="col" style="font-weight: bold !important;">{{_('Anonymous')}}</th>
+          <th scope="col" style="font-weight: bold !important;">{{_('Comment')}}</th>
+          <th scope="col" style="font-weight: bold !important;">{{_('Status')}}</th>
+          <th scope="col" style="font-weight: bold !important;">{{_('Actions')}}</th>
+          <th scope="col" style="font-weight: bold !important;"></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% block comment_list_inner %}
+        {% for comment in comments %}
+          {% 
+            snippet 
+            'comments/snippets/comment_item.html', 
+            comment=comment, 
+            item_class=item_class, 
+            truncate=truncate, 
+            truncate_title=truncate_title, 
+            show_remove=show_remove
+          %}
+        {% endfor %}
+      {% endblock %}
+      </tbody>
+    </table>
+  
+  {% if show_more %}
+  <div class="d-flex flex-row justify-content-end">
+    <a class="orderbtn" href="{{ h.url_for('comments.index') }}">{{_('View All')}}</a>
+   </div>
+  {% endif %}
+
+  </div>
+{% endif %}
+{% endblock %}
+

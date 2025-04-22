@@ -1,0 +1,63 @@
+
+<div class="row mb">
+    <div class="col-md-3">
+      <div class="innerindicators">
+        <img src="/images/r1.png">
+        <p class="sectortitle">{{_('Total')}}</p>
+        <p class="sectorcounter">
+          {{ statistics.total or 0 }}
+        </p>
+      </div>
+    </div>
+  
+    <div class="col-md-3">
+      <div class="innerindicators">
+        <img src="/images/DR4.png">
+        <p class="sectortitle">{{_('Draft/Pending')}}</p>
+        <p class="sectorcounter">
+          {{ statistics.state_breakdown.draft or 0 }}
+        </p>
+      </div>
+    </div>
+  
+  
+  
+    <div class="col-md-3">
+      <div class="innerindicators">
+        <img src="/images/DR5.png">
+        <p class="sectortitle">{{_('Approved')}}</p>
+        <p class="sectorcounter">
+          {{ statistics.state_breakdown.approved or 0 }}
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="row mt-4 mb-3">
+    <h4>{{_('Statistics According To Internal Actions')}}</h4>
+  
+    <div class="col-md-3">
+      <div class="innerindicators">
+        <img src="/images/DR2.png">
+        <p class="sectortitle">{{_('Hidden')}}</p>
+        <p class="sectorcounter">
+          {{ statistics.hide_breakdown[True] or 0}}
+        </p>
+      
+      </div>
+    </div>
+  
+    <div class="col-md-3">
+        <div class="innerindicators">
+          <img src="/images/push-pin.png">
+          <p class="sectortitle">{{_('Pinned')}}</p>
+          <p class="sectorcounter">
+            {{ statistics.pin_breakdown[True] or 0}}
+          </p>
+        
+        </div>
+      </div>
+
+  </div>
+
