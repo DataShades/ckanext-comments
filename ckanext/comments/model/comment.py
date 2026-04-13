@@ -7,7 +7,8 @@ from typing import Any, Callable, Optional
 from sqlalchemy import Column, DateTime, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import JSONB
 
-from sqlalchemy.orm import foreign, relationship
+from sqlalchemy.orm import foreign, relationship, Mapped
+
 
 import ckan.model as model
 from ckan.model.types import make_uuid
@@ -50,16 +51,16 @@ class Comment(Base):
 
     extras = Column(JSONB, nullable=False, default=dict)
 
-    thread: Any = relationship(Thread, single_parent=True)
+    thread: Mapped[Thread] = relationship(Thread, single_parent=True)
 
-    user: Any = relationship(
+    user: Mapped[model.User] = relationship(
         model.User,
         backref="comments",
         primaryjoin=(author_type == "user") & (model.User.id == foreign(author_id)),
         single_parent=True,
     )
 
-    reply_to: Any = relationship(
+    reply_to: Mapped[Comment|None] = relationship(
         "Comment", primaryjoin=id == reply_to_id, cascade="all, delete-orphan"
     )
 
