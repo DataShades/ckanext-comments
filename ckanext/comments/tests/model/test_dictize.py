@@ -1,5 +1,8 @@
-import datetime as dt
+from __future__ import annotations
 
+import datetime as dt
+from typing import Any
+from ckan import types
 import pytest
 
 import ckan.model as model
@@ -10,11 +13,15 @@ import ckanext.comments.model as c_model
 from ckanext.comments.model.dictize import comment_dictize, thread_dictize
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 class TestDictize:
-    def test_thread_dictize(self, Thread, Comment):
-        thread = Thread()
-        comment = Comment(thread=thread)
+    def test_thread_dictize(
+        self, thread: dict[str, Any], comment_factory: types.TestFactory
+    ):
+        comment = comment_factory(
+            subject_id=thread["subject_id"],
+            subject_type=thread["subject_type"],
+        )
         call_action("comments_comment_approve", id=comment["id"])
 
         th = model.Session.query(c_model.Thread).filter_by(id=thread["id"]).one()
@@ -29,9 +36,9 @@ class TestDictize:
         assert thread == dictized
         assert len(comments) == 1
 
-    def test_comment_dictize(self, Comment):
+    def test_comment_dictize(self, comment_factory: types.TestFactory):
         author = factories.User()
-        comment = Comment(author_type="user", author_id=author["id"])
+        comment = comment_factory(author_type="user", author_id=author["id"])
         c = model.Session.query(c_model.Comment).filter_by(id=comment["id"]).one()
 
         assert comment_dictize(c, {"model": model}) == comment
@@ -44,13 +51,23 @@ class TestDictize:
         author.pop("apikey")
         assert author == dictized_author
 
-    def test_thread_dictize_with_comments(self, Comment, Thread):
+    def test_thread_dictize_with_comments(
+        self, comment_factory: types.TestFactory, thread_factory: types.TestFactory
+    ):
         sysadmin = factories.Sysadmin()
         user = factories.User()
-        th = Thread()
-        c1 = Comment(thread=th)
-        c2 = Comment(thread=th, user=user)
-        c3 = Comment(thread=th)
+        th = thread_factory()
+        c1 = comment_factory(
+            subject_id=th["subject_id"],
+            subject_type=th["subject_type"],
+        )
+        c2 = comment_factory(
+            subject_id=th["subject_id"], subject_type=th["subject_type"], user=user
+        )
+        c3 = comment_factory(
+            subject_id=th["subject_id"],
+            subject_type=th["subject_type"],
+        )
         call_action("comments_comment_approve", id=c1["id"])
         thread = model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()
         comments = thread_dictize(
@@ -109,10 +126,18 @@ class TestDictize:
         )["comments"]
         assert len(comments) == 3
 
-    def test_thread_dictize_comments_filter_by_date(self, Comment, Thread):
-        th = Thread()
-        c1 = Comment(thread=th)
-        Comment(thread=th)
+    def test_thread_dictize_comments_filter_by_date(
+        self, comment_factory: types.TestFactory, thread_factory: types.TestFactory
+    ):
+        th = thread_factory()
+        c1 = comment_factory(
+            subject_id=th["subject_id"],
+            subject_type=th["subject_type"],
+        )
+        comment_factory(
+            subject_id=th["subject_id"],
+            subject_type=th["subject_type"],
+        )
         sysadmin = factories.Sysadmin()
 
         thread = model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()

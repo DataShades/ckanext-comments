@@ -9,35 +9,24 @@ ckan.module("comments-thread", function ($) {
     },
     initialize: function () {
       $.proxyAll(this, /_on/);
-      this.$(".comment-actions .remove-comment").on(
+      this.$(".comment-actions .remove-comment, .comment-actions [data-comment-action=remove]").on(
         "click",
         this._onRemoveComment
       );
-      this.$(".comment-actions .approve-comment").on(
+      this.$(".comment-actions .approve-comment, .comment-actions [data-comment-action=approve]").on(
         "click",
         this._onApproveComment
       );
-      this.$(".comment-actions .reply-to-comment").on(
+      this.$(".comment-actions .reply-to-comment, .comment-actions [data-comment-action=reply]").on(
         "click",
         this._onReplyToComment
       );
-      this.$(".comment-actions .edit-comment").on("click", this._onEditComment);
-      this.$(".comment-actions .save-comment").on("click", this._onSaveComment);
+      this.$(".comment-actions .edit-comment, .comment-actions [data-comment-action=edit]").on("click", this._onEditComment);
+      this.$(".comment-actions .save-comment, .comment-actions [data-comment-action=save]").on("click", this._onSaveComment);
       this.$(".comment-footer").on("click", this._onFooterClick);
       this.$(".comment-form").off("submit").on("submit", this._onSubmit);
     },
-    teardown: function () {
-      this.$(".comment-action.remove-comment").off(
-        "click",
-        this._onRemoveComment
-      );
-      this.$(".comment-actions .approve-comment").off(
-        "click",
-        this._onApproveComment
-      );
 
-      this.$(".comment-form").off("submit", this._onSubmit);
-    },
     _onFooterClick: function (e) {
       if (e.target.classList.contains("cancel-reply")) {
         this._disableActiveReply();
@@ -51,6 +40,7 @@ ckan.module("comments-thread", function ($) {
         });
       }
     },
+
     _onRemoveComment: function (e) {
       var id = e.currentTarget.dataset.id;
       var ajaxReload = this.options.ajaxReload;
@@ -62,13 +52,13 @@ ckan.module("comments-thread", function ($) {
           id: id,
         },
         function (e) {
-            if (ajaxReload) {
-                $(".modal").modal("hide");
+          if (ajaxReload) {
+            $(".modal").modal("hide");
 
-                $(document).trigger("comments:changed");
-            } else {
-                window.location.reload();
-            }
+            $(document).trigger("comments:changed");
+          } else {
+            window.location.reload();
+          }
         }
       );
     },
@@ -83,17 +73,19 @@ ckan.module("comments-thread", function ($) {
           id: id,
         },
         function () {
-            if (ajaxReload) {
-                $(document).trigger("comments:changed");
-            } else {
-                window.location.reload();
-            }
+          if (ajaxReload) {
+            $(document).trigger("comments:changed");
+          } else {
+            window.location.reload();
+          }
         }
       );
     },
+
     _disableActiveReply: function () {
       $(".comment .reply-textarea-wrapper").remove();
     },
+
     _onReplyToComment: function (e) {
       this._disableActiveReply();
       this._disableActiveEdit();
@@ -119,28 +111,32 @@ ckan.module("comments-thread", function ($) {
     _disableActiveEdit: function () {
       $(".comment.edit-in-progress")
         .removeClass(".edit-in-progress")
-        .find(".comment-action.save-comment")
+        .find(".comment-action.save-comment,[data-comment-action=save]")
         .addClass("hidden")
-        .prevObject.find(".comment-action.edit-comment")
+        .prop("hidden", true)
+        .prevObject.find(".comment-action.edit-comment,[data-comment-action=edit]")
         .removeClass("hidden")
+        .prop("hidden", false)
         .prevObject.find(".edit-textarea-wrapper")
         .remove()
         .prevObject.find(".comment-content")
-        .removeClass("hidden");
+        .removeClass("hidden")
+        .prop("hidden", false);
     },
     _onEditComment: function (e) {
       this._disableActiveReply();
       this._disableActiveEdit();
-      var target = $(e.currentTarget).addClass("hidden");
-      target.parent().find(".save-comment").removeClass("hidden");
+      var target = $(e.currentTarget).addClass("hidden").prop("hidden", true);
+      target.parent().find(".save-comment,[data-comment-action=save]").removeClass("hidden").prop("hidden", false);
       var content = target
-        .closest(".comment")
-        .addClass("edit-in-progress")
-        .find(".comment-content");
+          .closest(".comment")
+          .addClass("edit-in-progress")
+          .find(".comment-content");
       var textarea = $('<textarea rows="5" class="form-control">');
       textarea.text(content.text());
       content
         .addClass("hidden")
+        .prop("hidden", true)
         .parent()
         .append(
           $('<div class="control-full edit-textarea-wrapper">').append(textarea)
@@ -163,11 +159,11 @@ ckan.module("comments-thread", function ($) {
           content: content.val(),
         },
         function () {
-            if (ajaxReload) {
-                $(document).trigger("comments:changed");
-            } else {
-                window.location.reload();
-            }
+          if (ajaxReload) {
+            $(document).trigger("comments:changed");
+          } else {
+            window.location.reload();
+          }
         },
         function (err) {
           console.log(err);
@@ -202,11 +198,11 @@ ckan.module("comments-thread", function ($) {
         "comments_comment_create",
         data,
         function () {
-            if (ajaxReload) {
-                $(document).trigger("comments:changed");
-            } else {
-                window.location.reload();
-            }
+          if (ajaxReload) {
+            $(document).trigger("comments:changed");
+          } else {
+            window.location.reload();
+          }
         }
       );
     },

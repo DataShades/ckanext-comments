@@ -1,6 +1,8 @@
-import pytest
+from __future__ import annotations
 
-import ckan.model as model
+import pytest
+from ckan import model, types
+
 import ckan.plugins.toolkit as tk
 import ckan.tests.factories as factories
 from ckan.tests.helpers import call_action, call_auth
@@ -8,7 +10,7 @@ from ckan.tests.helpers import call_action, call_auth
 from ckanext.comments import config
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 class TestAuth:
     @pytest.mark.parametrize(
         "func,results",
@@ -34,11 +36,11 @@ class TestAuth:
                 with pytest.raises(tk.NotAuthorized):
                     call_auth(auth, context)
 
-    def test_comment_show(self, Comment):
+    def test_comment_show(self, comment_factory: types.TestFactory):
         user = factories.User()
         anon_ctx = {"model": model, "user": ""}
         user_ctx = {"model": model, "user": user["name"]}
-        comment = Comment(user=user)
+        comment = comment_factory(user=user)
         with pytest.raises(tk.NotAuthorized):
             call_auth("comments_comment_show", anon_ctx.copy(), id=comment["id"])
         assert call_auth("comments_comment_show", user_ctx.copy(), id=comment["id"])
@@ -48,11 +50,13 @@ class TestAuth:
         assert call_auth("comments_comment_show", user_ctx.copy(), id=comment["id"])
 
     @pytest.mark.ckan_config(config.CONFIG_DRAFT_EDITS_BY_AUTHOR, False)
-    def test_comment_update(self, Comment, monkeypatch, ckan_config):
+    def test_comment_update(
+        self, comment_factory: types.TestFactory, monkeypatch, ckan_config
+    ):
         user = factories.User()
         user_ctx = {"model": model, "user": user["name"]}
         another_user_ctx = {"model": model, "user": factories.User()["name"]}
-        comment = Comment(user=user)
+        comment = comment_factory(user=user)
 
         with pytest.raises(tk.NotAuthorized):
             assert call_auth(

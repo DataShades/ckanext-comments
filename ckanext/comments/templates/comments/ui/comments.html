@@ -1,0 +1,114 @@
+{%- macro ext_comments_thread(subject_id, subject_type, enable_posting, enable_replies, enable_removal, enable_editing) -%}
+  {% set thread = thread or h.comments_thread_for(subject_id, subject_type) %}
+  {%- call ui.util.call(ui.ext_comments_thread_box, thread=thread, enable_posting=enable_posting) -%}
+    {%- call ui.util.call(ui.ext_comments_list) -%}
+      {{ ui.util.map(ui.ext_comments_comment, thread.comments, reply=enable_replies, remove=enable_removal, edit=enable_editing) }}
+    {%- endcall %}
+  {%- endcall %}
+{%- endmacro %}
+
+{%- macro ext_comments_thread_box(content, thread, enable_posting) -%}
+  {%- if enable_posting is undefined -%}
+    {%- set enable_posting = h.check_access('comments_comment_create', thread) -%}
+  {%- endif %}
+
+  <div {{ ui.util.attrs(kwargs) }} data-module="comments-thread">
+    {%- if thread.comments -%}
+      <h3 class="heading">{{ _('Comments') }}</h3>
+      {{ content }}
+    {%- endif %}
+
+    {%- if enable_posting -%}
+      {{ ui.ext_comments_form(thread.subject_id, thread.subject_type) }}
+    {%- endif -%}
+  </div>
+{%- endmacro %}
+
+
+{%- macro ext_comments_form(subject_id, subject_type, action) -%}
+  {%- set action = action or h.url_for("comments.post_comment", subject_id=subject_id, subject_type=subject_type) -%}
+  {%- call ui.util.call(ui.form, method="POST", action=action, **kwargs) -%}
+    {{ ui.textarea(name="content", label=_('Leave a comment'), required=true) }}
+    {%- call ui.util.call(ui.form_actions) -%}
+      {{ ui.button(_("Save"), type="submit") }}
+    {%- endcall %}
+  {%- endcall %}
+{%- endmacro %}
+
+{%- macro ext_comments_list(content) -%}
+  {{ ui.list(content, **kwargs) }}
+{%- endmacro %}
+
+
+{%- macro ext_comments_comment(comment, reply, remove, edit) -%}
+  <div class="comment comment-state-{{ comment.state }}" id="comment-{{ comment.id }}">
+    <div class="comment-heading">
+      {{ ui.ext_comments_comment_authored(comment) }}
+      {{ ui.ext_comments_comment_actions(comment, reply=reply, remove=remove, edit=edit) }}
+    </div>
+
+    <div class="comment-body">
+      {{ ui.ext_comments_comment_content(comment) }}
+    </div>
+    <div class="comment-footer">
+      {{ ui.ext_comments_comment_footer(comment) }}
+    </div>
+  </div>
+
+{%- endmacro %}
+
+
+{%- macro ext_comments_comment_authored(comment) -%}
+  <div class="comment-authored">
+
+    <div class="author-avatar">
+      {{ h.user_image(comment.author.name, size=26) }}
+    </div>
+
+    <div class="comment-meta">
+      <div class="author-name">
+        {{ comment.author.fullname or comment.author.name }}
+      </div>
+      <div class="comment-date">
+        {{ h.time_ago_from_timestamp(comment.modified_at or comment.created_at) }}
+      </div>
+    </div>
+
+  </div>
+{%- endmacro %}
+
+{%- macro ext_comments_comment_actions(comment, reply, remove, edit) -%}
+  {%- if reply is undefined -%}
+    {%- set reply = h.check_access('comments_reply_create', {"reply_to_id": comment.id}) -%}
+  {%- endif %}
+  {%- if edit is undefined -%}
+    {%- set edit = h.check_access('comments_comment_update', comment) -%}
+  {%- endif %}
+  {%- if remove is undefined -%}
+    {%- set remove = h.check_access('comments_comment_delete', comment) -%}
+
+  {%- endif %}
+
+  <div class="comment-actions">
+    {{ ui.button(ui.icon("mail-reply") ~ _("Reply"), data={"comment-action": "reply", "id": comment.id}, aria={"label": _("Reply to comment")}) if reply }}
+
+    {{ ui.button(ui.icon("check") ~ _("Approve"), data={"comment-action": "approve", "id": comment.id}, aria={"label": _("Approve comment")}) if not comment.approved and h.check_access('comments_comment_approve', comment) }}
+
+    {% if edit %}
+      {{ ui.button(ui.icon("edit") ~ _("Edit"), data={"comment-action": "edit", "id": comment.id}, aria={"label": _("Edit comment")}) }}
+      {{ ui.button(ui.icon("save") ~ _("Save"), attrs={"hidden": true}, data={"comment-action": "save", "id": comment.id}, aria={"label": _("Save comment")}) }}
+    {% endif %}
+
+    {{ ui.button(ui.icon("trash") ~ _("Remove"), data={"comment-action": "remove", "id": comment.id}, aria={"label": _("Remove comment")}) if remove }}
+  </div>
+{%- endmacro %}
+
+{%- macro ext_comments_comment_content(comment) -%}
+  <div class="comment-content">
+    {{- (comment.content)|replace('\n', '\n<br/>'|safe) -}}
+  </div>
+{%- endmacro %}
+
+{%- macro ext_comments_comment_footer(comment) -%}
+  <hr/>
+{%- endmacro %}

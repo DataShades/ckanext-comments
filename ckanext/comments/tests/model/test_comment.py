@@ -2,8 +2,8 @@ import pytest
 
 import ckan.model as model
 import ckan.tests.factories as factories
-from ckan.tests.helpers import call_action
 
+from ckan import types
 import ckanext.comments.model as c_model
 from ckanext.comments.exceptions import UnsupportedAuthorType
 
@@ -15,23 +15,31 @@ def test_approval():
     assert c.is_approved()
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 class TestComment:
-    def test_authored_by(self, Comment):
+    def test_authored_by(self, comment_factory: types.TestFactory):
         author = factories.User()
         not_author = factories.User()
-        comment = Comment(author_type="user", author_id=author["id"])
+        comment = comment_factory(author_type="user", author_id=author["id"])
         c = model.Session.query(c_model.Comment).filter_by(id=comment["id"]).one()
         assert c.is_authored_by(author["id"])
         assert c.is_authored_by(author["name"])
         assert not c.is_authored_by(not_author["id"])
         assert not c.is_authored_by(not_author["name"])
 
-    def test_by_thread(self, Comment, Thread):
-        th = Thread()
-        c1 = Comment(thread=th)
-        c2 = Comment(thread=th)
-        c3 = Comment()
+    def test_by_thread(
+        self, comment_factory: types.TestFactory, thread_factory: types.TestFactory
+    ):
+        th = thread_factory()
+        c1 = comment_factory(
+            subject_id=th["subject_id"],
+            subject_type=th["subject_type"],
+        )
+        c2 = comment_factory(
+            subject_id=th["subject_id"],
+            subject_type=th["subject_type"],
+        )
+        c3 = comment_factory()
 
         g1, g2, g3 = (
             [c.id for c in group]

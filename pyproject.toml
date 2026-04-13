@@ -60,6 +60,9 @@ filterwarnings = [
 
 [tool.pyright]
 pythonVersion = "3.8"
+extraPaths = [
+           "../ckan",
+]
 include = ["ckanext"]
 exclude = [
     "**/test*",

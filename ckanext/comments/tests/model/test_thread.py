@@ -1,5 +1,5 @@
 import pytest
-
+from ckan import types
 import ckan.model as model
 import ckan.tests.factories as factories
 
@@ -7,23 +7,31 @@ import ckanext.comments.model as c_model
 from ckanext.comments.exceptions import UnsupportedSubjectType
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 class TestThread:
-    def test_comments(self, Thread, Comment):
-        th = Thread()
+    def test_comments(
+        self, thread_factory: types.TestFactory, comment_factory: types.TestFactory
+    ):
+        th = thread_factory()
         thread = model.Session.query(c_model.Thread).filter_by(id=th["id"]).one()
         assert thread.comments().count() == 0
 
-        Comment(thread=th)
+        comment_factory(
+            subject_id=th["subject_id"],
+            subject_type=th["subject_type"],
+        )
         assert thread.comments().count() == 1
 
-        Comment(thread=th)
+        comment_factory(
+            subject_id=th["subject_id"],
+            subject_type=th["subject_type"],
+        )
         assert thread.comments().count() == 2
 
-        Comment()
+        comment_factory()
         assert thread.comments().count() == 2
 
-    def test_get_subject(self, Thread):
+    def test_get_subject(self):
         dataset = factories.Dataset()
         th = c_model.Thread(subject_type="taxes")
 

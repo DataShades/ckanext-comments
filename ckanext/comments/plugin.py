@@ -7,18 +7,24 @@ import ckanext.comments.logic.auth as auth
 import ckanext.comments.logic.validators as validators
 
 try:
-    config_declarations = tk.blanket.config_declarations
-except AttributeError:
-    config_declarations = lambda cls: cls
+    from ckanext.theming.interfaces import ITheme
+except ImportError:
+    ITheme = None
 
-
-@config_declarations
+@tk.blanket.config_declarations
+@tk.blanket.blueprints
 class CommentsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IAuthFunctions)
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IValidators)
+
+
+    if ITheme:
+        plugins.implements(ITheme, inherit=True)
+        def get_additional_theme_ui_sources(self):
+            return ["comments/ui.html"]
 
     # IConfigurer
 
