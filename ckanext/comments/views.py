@@ -17,6 +17,7 @@ def post_comment(subject_type: str, subject_id: str):
         {
             "subject_id": subject_id,
             "subject_type": subject_type,
+            "create_thread": "true",
         }
     )
 
