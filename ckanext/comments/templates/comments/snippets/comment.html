@@ -43,7 +43,7 @@
             {% endif %}
 
             {% if h.check_access('comments_comment_delete', comment) %}
-                <button aria-label="remove comment" type="button" class="btn btn-remove comment-action" data-toggle="modal" data-target="#confirmation-modal-{{ comment.id }}">
+                <button aria-label="remove comment" type="button" class="btn btn-remove comment-action" data-bs-toggle="modal" data-bs-target="#confirmation-modal-{{ comment.id }}">
                     <i class="fa fa-trash-o"></i>
                     <span class="text">{{ _('Remove') }}</span>
                 </button>
