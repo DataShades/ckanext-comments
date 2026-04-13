@@ -2,12 +2,14 @@ from __future__ import annotations
 from ckan.logic import parse_params
 import ckan.plugins.toolkit as tk
 from flask import Blueprint
+import logging
 
 __all__ = [
     "bp",
 ]
 
 bp = Blueprint("comments", __name__)
+log = logging.getLogger(__name__)
 
 
 @bp.route("/thread/<subject_type>/<subject_id>/comment/post", methods=["POST"])
@@ -24,6 +26,7 @@ def post_comment(subject_type: str, subject_id: str):
     try:
         tk.get_action("comments_comment_create")({}, data)
     except tk.ValidationError:
+        log.exception("Validation error during comment creation")
         tk.h.flash_error(tk._("Cannot save a comment"))
     except tk.NotAuthorized:
         return tk.abort(403, tk._("Not authorized to post a comment"))
