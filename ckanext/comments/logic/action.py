@@ -65,6 +65,15 @@ def thread_show(context, data_dict):
         include_author(bool, optional): show authors of the comments
         combine_comments(bool, optional): combine comments into a tree-structure
         after_date(str:ISO date, optional): show comments only since the given date
+        newest_first(bool, optional): order comments from newest to oldest
+        limit(int, optional): max number of comments to return. With
+            combine_comments, applies to root comments only
+        offset(int, optional): number of comments to skip. With
+            combine_comments, applies to root comments only
+
+    Returns:
+        Thread dict. When include_comments is true, also includes ``count`` -
+        total matching comments (root comments when combine_comments is true).
     """
     tk.check_access("comments_thread_show", context, data_dict)
     thread = Thread.for_subject(
@@ -81,6 +90,8 @@ def thread_show(context, data_dict):
     context["after_date"] = data_dict.get("after_date")
 
     context["newest_first"] = data_dict["newest_first"]
+    context["limit"] = data_dict.get("limit")
+    context["offset"] = data_dict["offset"]
 
     thread_dict = get_dictizer(type(thread))(thread, context)
     return thread_dict

@@ -105,6 +105,85 @@ class TestThreadShow:
 
         assert len(thread["comments"]) == 0
 
+    def test_thread_show_limit_offset(
+        self, thread_factory: types.TestFactory, comment_factory: types.TestFactory
+    ):
+        t = thread_factory()
+        comments = []
+        for _ in range(5):
+            comment = comment_factory(
+                subject_id=t["subject_id"],
+                subject_type=t["subject_type"],
+            )
+            call_action("comments_comment_approve", id=comment["id"])
+            comments.append(comment)
+
+        thread = call_action(
+            "comments_thread_show",
+            subject_id=t["subject_id"],
+            subject_type=t["subject_type"],
+            include_comments=True,
+            limit=2,
+            offset=1,
+        )
+        assert thread["count"] == 5
+        assert len(thread["comments"]) == 2
+        assert thread["comments"][0]["id"] == comments[1]["id"]
+        assert thread["comments"][1]["id"] == comments[2]["id"]
+
+        thread = call_action(
+            "comments_thread_show",
+            subject_id=t["subject_id"],
+            subject_type=t["subject_type"],
+            include_comments=True,
+            newest_first=True,
+            limit=2,
+        )
+        assert thread["count"] == 5
+        assert [c["id"] for c in thread["comments"]] == [
+            comments[4]["id"],
+            comments[3]["id"],
+        ]
+
+    def test_thread_show_limit_with_combine(
+        self, thread_factory: types.TestFactory, comment_factory: types.TestFactory
+    ):
+        t = thread_factory()
+        user = factories.User()
+        roots = []
+        for _ in range(3):
+            comment = comment_factory(
+                subject_id=t["subject_id"],
+                subject_type=t["subject_type"],
+            )
+            call_action("comments_comment_approve", id=comment["id"])
+            roots.append(comment)
+
+        reply = call_action(
+            "comments_comment_create",
+            {"user": user["name"]},
+            subject_id=t["subject_id"],
+            subject_type=t["subject_type"],
+            content="reply",
+            reply_to_id=roots[1]["id"],
+        )
+        call_action("comments_comment_approve", id=reply["id"])
+
+        thread = call_action(
+            "comments_thread_show",
+            subject_id=t["subject_id"],
+            subject_type=t["subject_type"],
+            include_comments=True,
+            combine_comments=True,
+            limit=1,
+            offset=1,
+        )
+        assert thread["count"] == 3
+        assert len(thread["comments"]) == 1
+        assert thread["comments"][0]["id"] == roots[1]["id"]
+        assert len(thread["comments"][0]["replies"]) == 1
+        assert thread["comments"][0]["replies"][0]["id"] == reply["id"]
+
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 class TestThreadDelete:
