@@ -32,6 +32,7 @@ class TestDictize:
             th, {"model": model, "user": "", "include_comments": True}
         )
         comments = dictized.pop("comments")
+        assert dictized.pop("count") == 1
         dictized["comments"] = None
         assert thread == dictized
         assert len(comments) == 1

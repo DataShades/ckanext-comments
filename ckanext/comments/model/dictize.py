@@ -50,6 +50,7 @@ def combine_comments(comments: list["CommentDict"]):
 
 def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
     comments_dictized = None
+    count = None
 
     if context.get("include_comments"):
         query = Comment.by_thread(cast(str, obj.id))
@@ -80,15 +81,75 @@ def thread_dictize(obj: Thread, context: Any) -> dict[str, Any]:
             date_filer = Comment.created_at >= after_date
             query = query.filter(date_filer)
 
-        comments_dictized = []
+        combine = context.get("combine_comments")
+        limit = context.get("limit")
+        offset = context.get("offset") or 0
 
-        for comment in query:
-            assert isinstance(comment, Comment)
-            dictized = comment_dictize(comment, context)
-            comments_dictized.append(dictized)
-        if context.get("combine_comments"):
+        if combine:
+            root_query = query.filter(Comment.reply_to_id.is_(None))
+            count = root_query.count()
+            if limit is None and not offset:
+                comments = list(query)
+            else:
+                comments = _comments_page_with_replies(
+                    query, root_query, limit=limit, offset=offset
+                )
+        else:
+            count = query.count()
+            if offset:
+                query = query.offset(offset)
+            if limit is not None:
+                query = query.limit(limit)
+            comments = list(query)
+
+        comments_dictized = [
+            comment_dictize(comment, context) for comment in comments
+        ]
+        if combine:
             comments_dictized = combine_comments(comments_dictized)
-    return d.table_dictize(obj, context, comments=comments_dictized)
+
+    extras: dict[str, Any] = {"comments": comments_dictized}
+    if count is not None:
+        extras["count"] = count
+    return d.table_dictize(obj, context, **extras)
+
+
+def _comments_page_with_replies(
+    query: Any,
+    root_query: Any,
+    limit: Optional[int],
+    offset: int,
+) -> list[Comment]:
+    """Return a page of root comments plus their reply trees.
+
+    Pagination applies only to root comments (``reply_to_id is None``). All
+    nested replies for the selected roots are included so ``combine_comments``
+    can rebuild complete trees.
+    """
+    roots_page = root_query.offset(offset)
+    if limit is not None:
+        roots_page = roots_page.limit(limit)
+
+    root_ids = [comment.id for comment in roots_page]
+    if not root_ids:
+        return []
+
+    selected: dict[str, Comment] = {
+        comment.id: comment
+        for comment in query.filter(Comment.id.in_(root_ids))
+    }
+    frontier = set(root_ids)
+    while frontier:
+        children = list(query.filter(Comment.reply_to_id.in_(frontier)))
+        frontier = set()
+        for child in children:
+            if child.id in selected:
+                continue
+            selected[child.id] = child
+            frontier.add(child.id)
+
+    # Keep the filtered query order among selected comments
+    return list(query.filter(Comment.id.in_(selected.keys())))
 
 
 def comment_dictize(obj: Comment, context: Any, **extra: Any) -> dict[str, Any]:

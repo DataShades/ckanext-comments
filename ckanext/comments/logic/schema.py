@@ -17,7 +17,13 @@ def thread_create(not_empty, unicode_safe):
 
 
 @validator_args
-def thread_show(default, boolean_validator, ignore_missing, isodate):
+def thread_show(
+    default,
+    boolean_validator,
+    ignore_missing,
+    isodate,
+    natural_number_validator,
+):
     schema = thread_create()
     schema.update(
         {
@@ -27,6 +33,8 @@ def thread_show(default, boolean_validator, ignore_missing, isodate):
             "include_author": [default(False), boolean_validator],
             "combine_comments": [default(False), boolean_validator],
             "after_date": [ignore_missing, isodate],
+            "limit": [ignore_missing, natural_number_validator],
+            "offset": [default(0), natural_number_validator],
         }
     )
     return schema
